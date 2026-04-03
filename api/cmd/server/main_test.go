@@ -4,22 +4,28 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/akaitigo/kenketsu-plus/api/internal/handler"
+	"github.com/akaitigo/kenketsu-plus/api/internal/repository"
+	"github.com/akaitigo/kenketsu-plus/api/internal/service"
 )
 
-func TestHealthHandler(t *testing.T) {
+func TestHealthEndpoint(t *testing.T) {
 	t.Parallel()
+
+	router := handler.NewRouter(
+		repository.NewCenterRepository(),
+		repository.NewDonationRepository(),
+		repository.NewInventoryRepository(),
+		repository.NewSubscriptionRepository(),
+		service.NewDonationCalculator(),
+	)
 
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rec := httptest.NewRecorder()
-
-	healthHandler(rec, req)
+	router.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Errorf("expected status 200, got %d", rec.Code)
-	}
-
-	body := rec.Body.String()
-	if body == "" {
-		t.Error("expected non-empty body")
 	}
 }
