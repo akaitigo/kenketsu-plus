@@ -11,8 +11,8 @@ func TestDonationCenter_Validate(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		center  model.DonationCenter
 		name    string
+		center  model.DonationCenter
 		wantErr bool
 	}{
 		{

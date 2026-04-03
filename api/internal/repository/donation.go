@@ -9,8 +9,8 @@ import (
 )
 
 type DonationRepository struct {
-	mu        sync.RWMutex
 	donations map[string]*model.Donation
+	mu        sync.RWMutex
 	nextID    int
 }
 

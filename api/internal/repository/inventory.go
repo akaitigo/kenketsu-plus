@@ -9,8 +9,8 @@ import (
 )
 
 type InventoryRepository struct {
-	mu        sync.RWMutex
 	inventory map[model.BloodType]*model.BloodInventory
+	mu        sync.RWMutex
 	nextID    int
 }
 

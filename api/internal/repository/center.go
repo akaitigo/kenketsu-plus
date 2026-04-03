@@ -11,8 +11,8 @@ import (
 )
 
 type CenterRepository struct {
-	mu      sync.RWMutex
 	centers map[string]*model.DonationCenter
+	mu      sync.RWMutex
 	nextID  int
 }
 

@@ -9,8 +9,8 @@ import (
 )
 
 type SubscriptionRepository struct {
-	mu            sync.RWMutex
 	subscriptions map[string]*model.PushSubscription
+	mu            sync.RWMutex
 	nextID        int
 }
 

@@ -15,9 +15,9 @@ func NewDonationCalculator() *DonationCalculator {
 
 type NextAvailableResult struct {
 	NextDate       time.Time `json:"nextDate"`
+	Reason         string    `json:"reason"`
 	DaysRemaining  int       `json:"daysRemaining"`
 	CanDonateToday bool      `json:"canDonateToday"`
-	Reason         string    `json:"reason"`
 }
 
 func (c *DonationCalculator) intervalWeeks(donationType model.DonationType, gender model.Gender) int {
