@@ -1,52 +1,53 @@
 # Harvest: kenketsu-plus
 
-## メトリクス (v1.1.0)
+## メトリクス
 
-| 項目 | v1.0.0 | v1.1.0 |
-|------|--------|--------|
-| コミット数 | 6 | 8 |
-| PR数（マージ済み） | 5 | 7 |
-| Issue数（クローズ済み） | 5 | 5 |
-| ADR数 | 1 | 1 |
-| CLAUDE.md行数 | 34 | 34 |
-| Go テストケース | 58 | 60 (+2) |
-| Frontend テストケース | 28 | 28 |
-| 合計テスト | 86 | 88 |
-| タグ | v1.0.0 | v1.1.0 |
+| 項目 | v1.0.0 | v1.1.0 | v1.2.0 |
+|------|--------|--------|--------|
+| コミット数 | 6 | 8 | 10 |
+| PR数（マージ済み） | 5 | 7 | 9 |
+| Issue数（クローズ済み） | 5 | 5 | 5 |
+| ADR数 | 1 | 1 | 1 |
+| Go テストケース | 58 | 60 | 60 |
+| Frontend テストケース | 28 | 28 | 29 |
+| 合計テスト | 86 | 88 | 89 |
+| レビュー指摘対応 | — | 12件 | +7件 (計19件) |
 
-## v1.1.0 コードレビュー修正サマリー
+## レビュー修正履歴
 
-### 修正した指摘 (12件)
+### v1.1.0 (初回レビュー対応: 12件)
+- C-1: CORS環境変数制限
+- C-2: 通知API認証 (X-Notify-Secret)
+- H-1: ReadTimeout/WriteTimeout/IdleTimeout
+- H-2: セキュリティヘッダー
+- H-3: MaxBytesReader (1MB)
+- H-5: radius バリデーション
+- H-7: Targets二重エンコードバグ
+- H-9: useEffect クリーンアップ
+- M-1: sw.js try/catch
+- M-3: Haversineキャッシュ
+- M-4: 成分献血volume修正
 
-| 重要度 | 件数 | 内容 |
-|--------|------|------|
-| Critical | 2 | CORS制限 (C-1), 通知API認証 (C-2) |
-| High | 5 | タイムアウト (H-1), セキュリティヘッダー (H-2), MaxBytesReader (H-3), radius検証 (H-5), Targetsバグ (H-7), useEffectクリーンアップ (H-9) |
-| Medium | 4 | sw.js try/catch (M-1), Haversineキャッシュ (M-3), 成分献血volume (M-4) |
+### v1.2.0 (再レビュー対応: 7件)
+- C-2強化: NOTIFY_SECRET 必須化（未設定→503）
+- C-3: RequireAdminKey ミドルウェア（POST centers, PUT inventory）
+- H-4: NotificationToggle をインベントリページに接続
+- H-8: DonationForm レンダリングテスト（.ts→.tsx、render+fireEvent）
+- M-2: api.ts にオプションランタイムバリデーター
+- M-7: writeRepoError でValidationError→400、その他→500に分類
+- NEW-1: 通知レスポンスを「キューしました」に修正
 
-### 未対応（次フェーズ候補）
-
-| ID | 内容 | 理由 |
+### 残存（次フェーズ候補）
+| ID | 内容 | 工数 |
 |----|------|------|
-| H-6 | Repository interface + DB接続 | 工数1-2日。ポートフォリオ評価への最大インパクト |
-| H-4 | NotificationToggle のページ組み込み | VAPID鍵生成の環境準備が必要 |
-| H-8 | DonationForm の動作テスト強化 | jsdom + render テスト拡充 |
-| M-2 | api.ts の型アサーション改善 | zodなどランタイムバリデーション導入 |
-| M-5 | ユーザー分離（認証） | 認証基盤の設計が前提 |
-| C-3 | 管理者API認可 | 認証基盤の設計が前提 |
+| H-6 | Repository interface + PostgreSQL接続 | 1-2日 |
+| M-5 | ユーザー分離（認証基盤が前提） | 2-3日 |
 
-## 振り返り
-
-### v1.0.0 → v1.1.0 の改善点
-- セキュリティスコアが大幅改善（CORS制限、認証、ヘッダー、DoS対策）
-- 成分献血の登録バグが解消（volumeMl=0許可）
-- フロントエンドの競合状態が解消（useEffect cleanup）
-- Haversine距離計算のパフォーマンス改善
-
-### テンプレート改善提案（v1.0.0分含む）
-1. `.golangci.yml` に `fieldalignment` チェック推奨設定を追記
-2. vitest.config.ts に `esbuild: { jsx: "automatic" }` + `jsdom` を初期設定
-3. Go `go.sum` 生成を初期スキャフォールドに含める（CI cache問題回避）
-4. CORSミドルウェアのテンプレートに環境変数制限をデフォルトで含める
-5. セキュリティヘッダーをLayer-0ミドルウェアテンプレートに含める
-6. `MaxBytesReader` をPOST/PUTハンドラのテンプレートに含める
+## テンプレート改善提案
+1. `.golangci.yml` に `fieldalignment` チェック推奨設定
+2. vitest.config.ts に `esbuild: { jsx: "automatic" }` + `jsdom`
+3. Go `go.sum` を初期スキャフォールドに含める
+4. CORSミドルウェアに環境変数制限をデフォルトで含める
+5. セキュリティヘッダーをLayer-0テンプレートに含める
+6. `MaxBytesReader` + `RequireAdminKey` をPOST/PUTテンプレートに含める
+7. `writeRepoError` パターン（ValidationError分類）をハンドラテンプレートに含める

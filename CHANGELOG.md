@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.0] - 2026-04-04
+
+### Security
+- `NOTIFY_SECRET` 必須化 — 未設定時は503を返す (C-2 強化)
+- `RequireAdminKey` ミドルウェア追加: POST /api/centers, PUT /api/inventory に適用 (C-3)
+
+### Fixed
+- 通知レスポンスが実送信していないのに「送信しました」と返す問題 → 「キューしました」に修正 (NEW-1)
+- リポジトリエラーが全て400で返る問題 → ValidationError→400、その他→500に分類 (M-7)
+
+### Improved
+- `NotificationToggle` をインベントリページに接続 (H-4)
+- `DonationForm` のレンダリングテスト追加 (H-8)
+- `api.ts` にオプションランタイムバリデーターを追加 (M-2)
+
 ## [1.1.0] - 2026-04-04
 
 ### Security
