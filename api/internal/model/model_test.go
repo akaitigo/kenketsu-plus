@@ -64,7 +64,9 @@ func TestDonation_Validate(t *testing.T) {
 		{name: "invalid donation type", modify: func(d *model.Donation) { d.DonationType = "bad" }, wantErr: true},
 		{name: "invalid gender", modify: func(d *model.Donation) { d.Gender = "other" }, wantErr: true},
 		{name: "zero donated_at", modify: func(d *model.Donation) { d.DonatedAt = time.Time{} }, wantErr: true},
-		{name: "zero volume", modify: func(d *model.Donation) { d.VolumeMl = 0 }, wantErr: true},
+		{name: "zero volume whole blood", modify: func(d *model.Donation) { d.VolumeMl = 0 }, wantErr: true},
+		{name: "negative volume", modify: func(d *model.Donation) { d.VolumeMl = -1 }, wantErr: true},
+		{name: "component zero volume ok", modify: func(d *model.Donation) { d.DonationType = model.DonationTypeComponent; d.VolumeMl = 0 }, wantErr: false},
 	}
 
 	for _, tt := range tests {

@@ -12,13 +12,24 @@ export function NextDonationDate({ gender }: NextDonationDateProps) {
 	const [result, setResult] = useState<NextAvailableResult | null>(null);
 	const [loading, setLoading] = useState(true);
 
+	// H-9: cleanup to prevent stale state on rapid gender switch
 	useEffect(() => {
+		let cancelled = false;
 		setLoading(true);
 		api
 			.get<NextAvailableResult>(`/api/donations/next-available?gender=${gender}`)
-			.then(setResult)
-			.catch(() => setResult(null))
-			.finally(() => setLoading(false));
+			.then((data) => {
+				if (!cancelled) setResult(data);
+			})
+			.catch(() => {
+				if (!cancelled) setResult(null);
+			})
+			.finally(() => {
+				if (!cancelled) setLoading(false);
+			});
+		return () => {
+			cancelled = true;
+		};
 	}, [gender]);
 
 	if (loading) return <p>読み込み中...</p>;

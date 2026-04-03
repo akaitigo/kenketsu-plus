@@ -74,8 +74,12 @@ func (d *Donation) Validate() error {
 	if d.DonatedAt.IsZero() {
 		return ErrFieldRequired("donatedAt")
 	}
-	if d.VolumeMl <= 0 {
-		return ErrFieldInvalid("volumeMl", "must be positive")
+	// M-4: component donations may have 0 volume (platelet/plasma)
+	if d.DonationType != DonationTypeComponent && d.VolumeMl <= 0 {
+		return ErrFieldInvalid("volumeMl", "must be positive for whole blood donations")
+	}
+	if d.VolumeMl < 0 {
+		return ErrFieldInvalid("volumeMl", "must be non-negative")
 	}
 	return nil
 }

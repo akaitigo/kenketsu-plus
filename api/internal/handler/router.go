@@ -31,16 +31,16 @@ func NewRouter(
 
 	mux.HandleFunc("GET /api/centers", centerH.List)
 	mux.HandleFunc("GET /api/centers/{id}", centerH.GetByID)
-	mux.HandleFunc("POST /api/centers", centerH.Create)
+	mux.HandleFunc("POST /api/centers", LimitBody(centerH.Create))
 
 	mux.HandleFunc("GET /api/donations", donationH.List)
-	mux.HandleFunc("POST /api/donations", donationH.Create)
+	mux.HandleFunc("POST /api/donations", LimitBody(donationH.Create))
 	mux.HandleFunc("GET /api/donations/next-available", donationH.NextAvailable)
 
 	mux.HandleFunc("GET /api/inventory", inventoryH.List)
-	mux.HandleFunc("PUT /api/inventory/{bloodType}", inventoryH.Update)
+	mux.HandleFunc("PUT /api/inventory/{bloodType}", LimitBody(inventoryH.Update))
 
-	mux.HandleFunc("POST /api/subscriptions", subH.Create)
+	mux.HandleFunc("POST /api/subscriptions", LimitBody(subH.Create))
 	mux.HandleFunc("DELETE /api/subscriptions/{id}", subH.Delete)
 
 	notifyH := NewNotifyHandler(inventoryRepo, subRepo)

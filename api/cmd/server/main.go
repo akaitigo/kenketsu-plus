@@ -25,10 +25,14 @@ func main() {
 
 	router := handler.NewRouter(centerRepo, donationRepo, inventoryRepo, subRepo, calculator)
 
+	// H-1: full timeout configuration
 	srv := &http.Server{
 		Addr:              ":" + port,
 		Handler:           router,
 		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 
 	log.Printf("Starting server on :%s", port)

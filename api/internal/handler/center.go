@@ -52,6 +52,12 @@ func (h *CenterHandler) listByDistance(w http.ResponseWriter, r *http.Request, l
 		}
 	}
 
+	// H-5: validate radius bounds
+	if radius <= 0 || radius > 500 {
+		writeError(w, http.StatusBadRequest, "radius must be between 0 and 500 km")
+		return
+	}
+
 	centers := h.repo.ListByDistance(lat, lng, radius)
 	writeJSON(w, http.StatusOK, centers)
 }

@@ -1,5 +1,12 @@
 self.addEventListener("push", (event) => {
-	const data = event.data ? event.data.json() : {};
+	// M-1: guard against malformed push data
+	let data = {};
+	try {
+		data = event.data ? event.data.json() : {};
+	} catch (_) {
+		data = { title: "Kenketsu-Plus", body: "通知があります" };
+	}
+
 	const title = data.title || "Kenketsu-Plus";
 	const options = {
 		body: data.body || "通知があります",
