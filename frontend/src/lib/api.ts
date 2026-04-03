@@ -10,7 +10,8 @@ class ApiError extends Error {
 	}
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+// M-2: accept optional runtime validator to avoid unsafe `as T` casts
+async function request<T>(path: string, options?: RequestInit, validate?: (data: unknown) => T): Promise<T> {
 	const url = `${API_BASE}${path}`;
 	const res = await fetch(url, {
 		headers: { "Content-Type": "application/json" },
@@ -22,13 +23,20 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 		throw new ApiError(res.status, body);
 	}
 
-	return res.json() as Promise<T>;
+	const json: unknown = await res.json();
+	if (validate) {
+		return validate(json);
+	}
+	// Fallback: callers that don't provide a validator accept the risk
+	return json as T;
 }
 
 export const api = {
-	get: <T>(path: string) => request<T>(path),
-	post: <T>(path: string, body: unknown) => request<T>(path, { method: "POST", body: JSON.stringify(body) }),
-	put: <T>(path: string, body: unknown) => request<T>(path, { method: "PUT", body: JSON.stringify(body) }),
+	get: <T>(path: string, validate?: (data: unknown) => T) => request<T>(path, undefined, validate),
+	post: <T>(path: string, body: unknown, validate?: (data: unknown) => T) =>
+		request<T>(path, { method: "POST", body: JSON.stringify(body) }, validate),
+	put: <T>(path: string, body: unknown, validate?: (data: unknown) => T) =>
+		request<T>(path, { method: "PUT", body: JSON.stringify(body) }, validate),
 	delete: (path: string) => request<void>(path, { method: "DELETE" }),
 };
 

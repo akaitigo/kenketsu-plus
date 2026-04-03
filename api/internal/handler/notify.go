@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/akaitigo/kenketsu-plus/api/internal/repository"
 )
@@ -23,9 +24,13 @@ type NotifyResult struct {
 }
 
 func (h *NotifyHandler) InventoryAlert(w http.ResponseWriter, r *http.Request) {
-	// C-2: shared secret authentication
+	// C-2: NOTIFY_SECRET is always required — reject if unset or mismatched
 	secret := os.Getenv("NOTIFY_SECRET")
-	if secret != "" && r.Header.Get("X-Notify-Secret") != secret {
+	if secret == "" {
+		writeError(w, http.StatusServiceUnavailable, "notification service not configured")
+		return
+	}
+	if r.Header.Get("X-Notify-Secret") != secret {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
@@ -49,10 +54,10 @@ func (h *NotifyHandler) InventoryAlert(w http.ResponseWriter, r *http.Request) {
 
 	subs := h.subRepo.List()
 
-	// H-7: pass urgentTypes directly instead of double-encoding
+	// NEW-1: honest about delivery — we enqueue, actual push delivery is async
 	writeJSON(w, http.StatusOK, NotifyResult{
 		Notified: len(subs),
-		Message:  "在庫逼迫通知を送信しました",
+		Message:  "在庫逼迫通知を " + strconv.Itoa(len(subs)) + " 件の購読者にキューしました",
 		Targets:  urgentTypes,
 	})
 }

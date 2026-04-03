@@ -34,7 +34,7 @@ func (h *InventoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	updated, err := h.repo.Update(bloodType, body.Level)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeRepoError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, updated)

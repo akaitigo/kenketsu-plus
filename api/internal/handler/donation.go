@@ -32,7 +32,7 @@ func (h *DonationHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	created, err := h.repo.Create(&donation)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeRepoError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, created)
