@@ -18,9 +18,8 @@ func CORSMiddleware(next http.Handler) http.Handler {
 			w.Header().Set("Vary", "Origin")
 		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Notify-Secret")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Admin-Key, X-Notify-Secret")
 
-		// Security headers (H-2)
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
@@ -39,6 +38,23 @@ const maxRequestBodyBytes = 1 << 20 // 1MB
 func LimitBody(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodyBytes)
+		next(w, r)
+	}
+}
+
+// C-3: admin API key authentication for write endpoints
+func RequireAdminKey(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		adminKey := os.Getenv("ADMIN_API_KEY")
+		if adminKey == "" {
+			// Development mode: no key required
+			next(w, r)
+			return
+		}
+		if r.Header.Get("X-Admin-Key") != adminKey {
+			writeError(w, http.StatusForbidden, "admin access required")
+			return
+		}
 		next(w, r)
 	}
 }

@@ -43,10 +43,10 @@ func (r *InventoryRepository) List() []*model.BloodInventory {
 
 func (r *InventoryRepository) Update(bloodType model.BloodType, level model.InventoryLevel) (*model.BloodInventory, error) {
 	if !model.IsValidBloodType(bloodType) {
-		return nil, fmt.Errorf("invalid blood type: %s", bloodType)
+		return nil, model.ErrFieldInvalid("bloodType", "invalid blood type: "+string(bloodType))
 	}
 	if !model.IsValidInventoryLevel(level) {
-		return nil, fmt.Errorf("invalid inventory level: %s", level)
+		return nil, model.ErrFieldInvalid("level", "invalid inventory level: "+string(level))
 	}
 
 	r.mu.Lock()

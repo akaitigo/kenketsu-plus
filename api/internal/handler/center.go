@@ -52,9 +52,8 @@ func (h *CenterHandler) listByDistance(w http.ResponseWriter, r *http.Request, l
 		}
 	}
 
-	// H-5: validate radius bounds
 	if radius <= 0 || radius > 500 {
-		writeError(w, http.StatusBadRequest, "radius must be between 0 and 500 km")
+		writeError(w, http.StatusBadRequest, "radius must be greater than 0 and at most 500 km")
 		return
 	}
 
@@ -81,7 +80,7 @@ func (h *CenterHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	created, err := h.repo.Create(&center)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeRepoError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, created)

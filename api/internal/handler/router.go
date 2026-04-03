@@ -31,14 +31,16 @@ func NewRouter(
 
 	mux.HandleFunc("GET /api/centers", centerH.List)
 	mux.HandleFunc("GET /api/centers/{id}", centerH.GetByID)
-	mux.HandleFunc("POST /api/centers", LimitBody(centerH.Create))
+	// C-3: admin key required for center creation
+	mux.HandleFunc("POST /api/centers", RequireAdminKey(LimitBody(centerH.Create)))
 
 	mux.HandleFunc("GET /api/donations", donationH.List)
 	mux.HandleFunc("POST /api/donations", LimitBody(donationH.Create))
 	mux.HandleFunc("GET /api/donations/next-available", donationH.NextAvailable)
 
 	mux.HandleFunc("GET /api/inventory", inventoryH.List)
-	mux.HandleFunc("PUT /api/inventory/{bloodType}", LimitBody(inventoryH.Update))
+	// C-3: admin key required for inventory updates
+	mux.HandleFunc("PUT /api/inventory/{bloodType}", RequireAdminKey(LimitBody(inventoryH.Update)))
 
 	mux.HandleFunc("POST /api/subscriptions", LimitBody(subH.Create))
 	mux.HandleFunc("DELETE /api/subscriptions/{id}", subH.Delete)
