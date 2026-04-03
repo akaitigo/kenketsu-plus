@@ -8,10 +8,6 @@ import (
 	"github.com/akaitigo/kenketsu-plus/api/internal/service"
 )
 
-func date(year, month, day int) time.Time {
-	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
-}
-
 func makeDonation(donationType model.DonationType, gender model.Gender, donatedAt time.Time) *model.Donation {
 	return &model.Donation{
 		DonatedAt:    donatedAt,
