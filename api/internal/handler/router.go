@@ -43,5 +43,8 @@ func NewRouter(
 	mux.HandleFunc("POST /api/subscriptions", subH.Create)
 	mux.HandleFunc("DELETE /api/subscriptions/{id}", subH.Delete)
 
+	notifyH := NewNotifyHandler(inventoryRepo, subRepo)
+	mux.HandleFunc("POST /api/notify/inventory-alert", notifyH.InventoryAlert)
+
 	return CORSMiddleware(mux)
 }
