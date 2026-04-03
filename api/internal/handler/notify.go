@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
+	"os"
 
 	"github.com/akaitigo/kenketsu-plus/api/internal/repository"
 )
@@ -22,7 +22,14 @@ type NotifyResult struct {
 	Notified int      `json:"notified"`
 }
 
-func (h *NotifyHandler) InventoryAlert(w http.ResponseWriter, _ *http.Request) {
+func (h *NotifyHandler) InventoryAlert(w http.ResponseWriter, r *http.Request) {
+	// C-2: shared secret authentication
+	secret := os.Getenv("NOTIFY_SECRET")
+	if secret != "" && r.Header.Get("X-Notify-Secret") != secret {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
 	inventories := h.inventoryRepo.List()
 
 	var urgentTypes []string
@@ -41,15 +48,11 @@ func (h *NotifyHandler) InventoryAlert(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	subs := h.subRepo.List()
-	typesJSON, err := json.Marshal(urgentTypes)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to marshal urgent types")
-		return
-	}
 
+	// H-7: pass urgentTypes directly instead of double-encoding
 	writeJSON(w, http.StatusOK, NotifyResult{
 		Notified: len(subs),
 		Message:  "在庫逼迫通知を送信しました",
-		Targets:  []string{string(typesJSON)},
+		Targets:  urgentTypes,
 	})
 }

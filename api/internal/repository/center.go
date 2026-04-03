@@ -33,20 +33,31 @@ func (r *CenterRepository) List() []*model.DonationCenter {
 	return result
 }
 
+type centerWithDist struct {
+	center *model.DonationCenter
+	dist   float64
+}
+
 func (r *CenterRepository) ListByDistance(lat, lng, radiusKm float64) []*model.DonationCenter {
 	all := r.List()
-	var filtered []*model.DonationCenter
+
+	// M-3: cache haversine distances to avoid N log N recomputation in sort
+	candidates := make([]centerWithDist, 0, len(all))
 	for _, c := range all {
-		if haversineKm(lat, lng, c.Lat, c.Lng) <= radiusKm {
-			filtered = append(filtered, c)
+		d := haversineKm(lat, lng, c.Lat, c.Lng)
+		if d <= radiusKm {
+			candidates = append(candidates, centerWithDist{center: c, dist: d})
 		}
 	}
-	sort.Slice(filtered, func(i, j int) bool {
-		di := haversineKm(lat, lng, filtered[i].Lat, filtered[i].Lng)
-		dj := haversineKm(lat, lng, filtered[j].Lat, filtered[j].Lng)
-		return di < dj
+	sort.Slice(candidates, func(i, j int) bool {
+		return candidates[i].dist < candidates[j].dist
 	})
-	return filtered
+
+	result := make([]*model.DonationCenter, len(candidates))
+	for i, cd := range candidates {
+		result[i] = cd.center
+	}
+	return result
 }
 
 func (r *CenterRepository) GetByID(id string) (*model.DonationCenter, error) {
