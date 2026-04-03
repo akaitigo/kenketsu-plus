@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.1.0] - 2026-04-04
+
+### Security
+- CORS origin を環境変数 `CORS_ALLOWED_ORIGIN` で制限 (C-1)
+- 通知APIに `X-Notify-Secret` ヘッダー認証追加 (C-2)
+- セキュリティヘッダー追加: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` (H-2)
+- 全POST/PUTハンドラに `MaxBytesReader` (1MB) 適用 (H-3)
+- HTTP Server に `ReadTimeout`/`WriteTimeout`/`IdleTimeout` 設定 (H-1)
+
+### Fixed
+- `notify.go` Targets フィールドの二重JSONエンコードバグ (H-7)
+- 成分献血で `volumeMl=0` がバリデーションエラーになる問題 (M-4)
+- `NextDonationDate` の useEffect クリーンアップ未実装による競合状態 (H-9)
+- `sw.js` の push data パースでmalformed JSONによるSWクラッシュ (M-1)
+- `radius` パラメータに0-500km範囲バリデーション追加 (H-5)
+
+### Performance
+- `ListByDistance` のHaversine距離計算をキャッシュしソート時の再計算を排除 (M-3)
+
 ## [1.0.0] - 2026-04-04
 
 ### Added
