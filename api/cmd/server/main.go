@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/akaitigo/kenketsu-plus/api/internal/handler"
 	"github.com/akaitigo/kenketsu-plus/api/internal/repository"
@@ -24,8 +25,14 @@ func main() {
 
 	router := handler.NewRouter(centerRepo, donationRepo, inventoryRepo, subRepo, calculator)
 
+	srv := &http.Server{
+		Addr:              ":" + port,
+		Handler:           router,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+
 	log.Printf("Starting server on :%s", port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }

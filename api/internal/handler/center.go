@@ -20,33 +20,39 @@ func NewCenterHandler(repo *repository.CenterRepository) *CenterHandler {
 func (h *CenterHandler) List(w http.ResponseWriter, r *http.Request) {
 	latStr := r.URL.Query().Get("lat")
 	lngStr := r.URL.Query().Get("lng")
-	radiusStr := r.URL.Query().Get("radius")
 
-	if latStr != "" && lngStr != "" {
-		lat, err := strconv.ParseFloat(latStr, 64)
-		if err != nil {
-			writeError(w, http.StatusBadRequest, "invalid lat parameter")
-			return
-		}
-		lng, err := strconv.ParseFloat(lngStr, 64)
-		if err != nil {
-			writeError(w, http.StatusBadRequest, "invalid lng parameter")
-			return
-		}
-		radius := 10.0
-		if radiusStr != "" {
-			radius, err = strconv.ParseFloat(radiusStr, 64)
-			if err != nil {
-				writeError(w, http.StatusBadRequest, "invalid radius parameter")
-				return
-			}
-		}
-		centers := h.repo.ListByDistance(lat, lng, radius)
+	if latStr == "" || lngStr == "" {
+		centers := h.repo.List()
 		writeJSON(w, http.StatusOK, centers)
 		return
 	}
 
-	centers := h.repo.List()
+	h.listByDistance(w, r, latStr, lngStr)
+}
+
+func (h *CenterHandler) listByDistance(w http.ResponseWriter, r *http.Request, latStr, lngStr string) {
+	lat, err := strconv.ParseFloat(latStr, 64)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid lat parameter")
+		return
+	}
+
+	lng, err := strconv.ParseFloat(lngStr, 64)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid lng parameter")
+		return
+	}
+
+	radius := 10.0
+	if radiusStr := r.URL.Query().Get("radius"); radiusStr != "" {
+		radius, err = strconv.ParseFloat(radiusStr, 64)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid radius parameter")
+			return
+		}
+	}
+
+	centers := h.repo.ListByDistance(lat, lng, radius)
 	writeJSON(w, http.StatusOK, centers)
 }
 

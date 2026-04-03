@@ -11,16 +11,16 @@ const (
 )
 
 type DonationCenter struct {
+	CreatedAt      time.Time    `json:"createdAt"`
+	UpdatedAt      time.Time    `json:"updatedAt"`
 	ID             string       `json:"id"`
 	Name           string       `json:"name"`
 	Address        string       `json:"address"`
+	Status         CenterStatus `json:"status"`
 	Lat            float64      `json:"lat"`
 	Lng            float64      `json:"lng"`
 	Capacity       int          `json:"capacity"`
 	AvailableSlots int          `json:"availableSlots"`
-	Status         CenterStatus `json:"status"`
-	CreatedAt      time.Time    `json:"createdAt"`
-	UpdatedAt      time.Time    `json:"updatedAt"`
 }
 
 func (c *DonationCenter) Validate() error {

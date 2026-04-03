@@ -11,8 +11,8 @@ func TestDonationCenter_Validate(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name    string
 		center  model.DonationCenter
+		name    string
 		wantErr bool
 	}{
 		{
@@ -55,8 +55,8 @@ func TestDonation_Validate(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
 		modify  func(d *model.Donation)
+		name    string
 		wantErr bool
 	}{
 		{name: "valid", modify: func(_ *model.Donation) {}, wantErr: false},
@@ -84,8 +84,8 @@ func TestPushSubscription_Validate(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name    string
 		sub     model.PushSubscription
+		name    string
 		wantErr bool
 	}{
 		{name: "valid", sub: model.PushSubscription{Endpoint: "https://example.com", P256dh: "key", Auth: "auth"}, wantErr: false},

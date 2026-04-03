@@ -12,10 +12,10 @@ const (
 )
 
 type BloodInventory struct {
+	UpdatedAt time.Time      `json:"updatedAt"`
 	ID        string         `json:"id"`
 	BloodType BloodType      `json:"bloodType"`
 	Level     InventoryLevel `json:"level"`
-	UpdatedAt time.Time      `json:"updatedAt"`
 }
 
 func IsValidInventoryLevel(level InventoryLevel) bool {

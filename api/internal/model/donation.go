@@ -34,9 +34,9 @@ func IsValidBloodType(bt BloodType) bool {
 type DonationType string
 
 const (
-	DonationTypeWhole400   DonationType = "whole_400"
-	DonationTypeWhole200   DonationType = "whole_200"
-	DonationTypeComponent  DonationType = "component"
+	DonationTypeWhole400  DonationType = "whole_400"
+	DonationTypeWhole200  DonationType = "whole_200"
+	DonationTypeComponent DonationType = "component"
 )
 
 type Gender string
@@ -47,14 +47,14 @@ const (
 )
 
 type Donation struct {
+	DonatedAt    time.Time    `json:"donatedAt"`
+	CreatedAt    time.Time    `json:"createdAt"`
 	ID           string       `json:"id"`
 	BloodType    BloodType    `json:"bloodType"`
 	DonationType DonationType `json:"donationType"`
 	Gender       Gender       `json:"gender"`
-	DonatedAt    time.Time    `json:"donatedAt"`
-	VolumeMl     int          `json:"volumeMl"`
 	Memo         string       `json:"memo"`
-	CreatedAt    time.Time    `json:"createdAt"`
+	VolumeMl     int          `json:"volumeMl"`
 }
 
 func (d *Donation) Validate() error {

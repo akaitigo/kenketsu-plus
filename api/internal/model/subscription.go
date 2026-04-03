@@ -3,11 +3,11 @@ package model
 import "time"
 
 type PushSubscription struct {
+	CreatedAt time.Time `json:"createdAt"`
 	ID        string    `json:"id"`
 	Endpoint  string    `json:"endpoint"`
 	P256dh    string    `json:"p256dh"`
 	Auth      string    `json:"auth"`
-	CreatedAt time.Time `json:"createdAt"`
 }
 
 func (s *PushSubscription) Validate() error {
