@@ -1,10 +1,14 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/akaitigo/kenketsu-plus/api/internal/handler"
+	"github.com/akaitigo/kenketsu-plus/api/internal/repository"
+	"github.com/akaitigo/kenketsu-plus/api/internal/service"
 )
 
 func main() {
@@ -13,18 +17,22 @@ func main() {
 		port = "8080"
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", healthHandler)
+	centerRepo := repository.NewCenterRepository()
+	donationRepo := repository.NewDonationRepository()
+	inventoryRepo := repository.NewInventoryRepository()
+	subRepo := repository.NewSubscriptionRepository()
+	calculator := service.NewDonationCalculator()
+
+	router := handler.NewRouter(centerRepo, donationRepo, inventoryRepo, subRepo, calculator)
+
+	srv := &http.Server{
+		Addr:              ":" + port,
+		Handler:           router,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
 
 	log.Printf("Starting server on :%s", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
-	}
-}
-
-func healthHandler(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(map[string]string{"status": "ok"}); err != nil {
-		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 	}
 }
