@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -31,7 +32,7 @@ func createCenter(t *testing.T, router http.Handler, center model.DonationCenter
 		t.Fatalf("failed to marshal center: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodPost, "/api/centers", bytes.NewReader(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/centers", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -53,7 +54,7 @@ func TestListCenters_Empty(t *testing.T) {
 
 	router := newTestRouter()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/centers", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/centers", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -94,7 +95,7 @@ func TestListCenters_WithData(t *testing.T) {
 		AvailableSlots: 5,
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "/api/centers", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/centers", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -163,7 +164,7 @@ func TestCreateCenter_ValidationError_MissingName(t *testing.T) {
 		t.Fatalf("failed to marshal: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodPost, "/api/centers", bytes.NewReader(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/centers", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -192,7 +193,7 @@ func TestCreateCenter_ValidationError_InvalidLat(t *testing.T) {
 		t.Fatalf("failed to marshal: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodPost, "/api/centers", bytes.NewReader(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/centers", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -207,7 +208,7 @@ func TestCreateCenter_InvalidJSON(t *testing.T) {
 
 	router := newTestRouter()
 
-	req := httptest.NewRequest(http.MethodPost, "/api/centers", bytes.NewReader([]byte("not json")))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/centers", bytes.NewReader([]byte("not json")))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -231,7 +232,7 @@ func TestGetCenterByID_Success(t *testing.T) {
 		AvailableSlots: 20,
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "/api/centers/"+created.ID, nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/centers/"+created.ID, nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -257,7 +258,7 @@ func TestGetCenterByID_NotFound(t *testing.T) {
 
 	router := newTestRouter()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/centers/nonexistent-id", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/centers/nonexistent-id", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -292,7 +293,7 @@ func TestListCenters_DistanceFilter(t *testing.T) {
 	})
 
 	// Query near Shibuya with 5km radius
-	req := httptest.NewRequest(http.MethodGet, "/api/centers?lat=35.66&lng=139.70&radius=5", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/centers?lat=35.66&lng=139.70&radius=5", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -319,7 +320,7 @@ func TestListCenters_DistanceFilter_InvalidLat(t *testing.T) {
 
 	router := newTestRouter()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/centers?lat=abc&lng=139.70", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/centers?lat=abc&lng=139.70", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -333,7 +334,7 @@ func TestListCenters_DistanceFilter_InvalidLng(t *testing.T) {
 
 	router := newTestRouter()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/centers?lat=35.66&lng=abc", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/centers?lat=35.66&lng=abc", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -347,7 +348,7 @@ func TestListCenters_DistanceFilter_InvalidRadius(t *testing.T) {
 
 	router := newTestRouter()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/centers?lat=35.66&lng=139.70&radius=abc", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/centers?lat=35.66&lng=139.70&radius=abc", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -372,7 +373,7 @@ func TestListCenters_DistanceFilter_DefaultRadius(t *testing.T) {
 	})
 
 	// Query without radius param (default = 10km)
-	req := httptest.NewRequest(http.MethodGet, "/api/centers?lat=35.66&lng=139.70", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/centers?lat=35.66&lng=139.70", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 

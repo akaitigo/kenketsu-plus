@@ -2,8 +2,10 @@ package model
 
 import "time"
 
+// BloodType represents a blood type classification.
 type BloodType string
 
+// BloodType constants define the ABO-Rh blood type system.
 const (
 	BloodTypeAPos  BloodType = "A+"
 	BloodTypeANeg  BloodType = "A-"
@@ -15,6 +17,7 @@ const (
 	BloodTypeABNeg BloodType = "AB-"
 )
 
+// ValidBloodTypes lists all supported blood types.
 var ValidBloodTypes = []BloodType{
 	BloodTypeAPos, BloodTypeANeg,
 	BloodTypeBPos, BloodTypeBNeg,
@@ -22,6 +25,7 @@ var ValidBloodTypes = []BloodType{
 	BloodTypeABPos, BloodTypeABNeg,
 }
 
+// IsValidBloodType checks whether the given blood type is recognized.
 func IsValidBloodType(bt BloodType) bool {
 	for _, v := range ValidBloodTypes {
 		if v == bt {
@@ -31,21 +35,26 @@ func IsValidBloodType(bt BloodType) bool {
 	return false
 }
 
+// DonationType represents the kind of blood donation performed.
 type DonationType string
 
+// DonationType constants define the supported donation types.
 const (
 	DonationTypeWhole400  DonationType = "whole_400"
 	DonationTypeWhole200  DonationType = "whole_200"
 	DonationTypeComponent DonationType = "component"
 )
 
+// Gender represents the biological sex used for donation interval calculations.
 type Gender string
 
+// Gender constants define the supported genders for donation rules.
 const (
 	GenderMale   Gender = "male"
 	GenderFemale Gender = "female"
 )
 
+// Donation represents a single blood donation record.
 type Donation struct {
 	DonatedAt    time.Time    `json:"donatedAt"`
 	CreatedAt    time.Time    `json:"createdAt"`
@@ -57,6 +66,7 @@ type Donation struct {
 	VolumeMl     int          `json:"volumeMl"`
 }
 
+// Validate checks that all required fields are present and valid.
 func (d *Donation) Validate() error {
 	if !IsValidBloodType(d.BloodType) {
 		return ErrFieldInvalid("bloodType", "invalid blood type")

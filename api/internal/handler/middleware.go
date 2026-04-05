@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// CORSMiddleware adds CORS headers and security headers to all responses.
 func CORSMiddleware(next http.Handler) http.Handler {
 	allowedOrigin := os.Getenv("CORS_ALLOWED_ORIGIN")
 	if allowedOrigin == "" {
@@ -35,6 +36,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 
 const maxRequestBodyBytes = 1 << 20 // 1MB
 
+// LimitBody restricts the request body size to prevent abuse.
 func LimitBody(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodyBytes)
@@ -42,7 +44,7 @@ func LimitBody(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// C-3: admin API key authentication for write endpoints
+// RequireAdminKey enforces admin API key authentication for write endpoints (C-3).
 func RequireAdminKey(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		adminKey := os.Getenv("ADMIN_API_KEY")

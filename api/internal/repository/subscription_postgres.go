@@ -19,8 +19,7 @@ func NewPgSubscriptionRepository(db *sql.DB) *PgSubscriptionRepository {
 }
 
 // List returns all push subscriptions.
-func (r *PgSubscriptionRepository) List() []*model.PushSubscription {
-	ctx := context.Background()
+func (r *PgSubscriptionRepository) List(ctx context.Context) []*model.PushSubscription {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, endpoint, p256dh, auth, created_at
 		FROM push_subscriptions
@@ -49,12 +48,11 @@ func (r *PgSubscriptionRepository) List() []*model.PushSubscription {
 }
 
 // Create inserts a new push subscription.
-func (r *PgSubscriptionRepository) Create(s *model.PushSubscription) (*model.PushSubscription, error) {
+func (r *PgSubscriptionRepository) Create(ctx context.Context, s *model.PushSubscription) (*model.PushSubscription, error) {
 	if err := s.Validate(); err != nil {
 		return nil, err
 	}
 
-	ctx := context.Background()
 	err := r.db.QueryRowContext(ctx, `
 		INSERT INTO push_subscriptions (endpoint, p256dh, auth)
 		VALUES ($1, $2, $3)
@@ -67,8 +65,7 @@ func (r *PgSubscriptionRepository) Create(s *model.PushSubscription) (*model.Pus
 }
 
 // Delete removes a push subscription by ID.
-func (r *PgSubscriptionRepository) Delete(id string) error {
-	ctx := context.Background()
+func (r *PgSubscriptionRepository) Delete(ctx context.Context, id string) error {
 	result, err := r.db.ExecContext(ctx, `DELETE FROM push_subscriptions WHERE id = $1`, id)
 	if err != nil {
 		return err
@@ -84,8 +81,7 @@ func (r *PgSubscriptionRepository) Delete(id string) error {
 }
 
 // DeleteByEndpoint removes a push subscription by endpoint URL.
-func (r *PgSubscriptionRepository) DeleteByEndpoint(endpoint string) error {
-	ctx := context.Background()
+func (r *PgSubscriptionRepository) DeleteByEndpoint(ctx context.Context, endpoint string) error {
 	result, err := r.db.ExecContext(ctx, `DELETE FROM push_subscriptions WHERE endpoint = $1`, endpoint)
 	if err != nil {
 		return err

@@ -8,19 +8,23 @@ import (
 	"github.com/akaitigo/kenketsu-plus/api/internal/repository"
 )
 
+// InventoryHandler handles HTTP requests for blood inventory.
 type InventoryHandler struct {
 	repo repository.InventoryRepo
 }
 
+// NewInventoryHandler creates a new handler for blood inventory endpoints.
 func NewInventoryHandler(repo repository.InventoryRepo) *InventoryHandler {
 	return &InventoryHandler{repo: repo}
 }
 
-func (h *InventoryHandler) List(w http.ResponseWriter, _ *http.Request) {
-	inventory := h.repo.List()
+// List returns all blood inventory records.
+func (h *InventoryHandler) List(w http.ResponseWriter, r *http.Request) {
+	inventory := h.repo.List(r.Context())
 	writeJSON(w, http.StatusOK, inventory)
 }
 
+// Update changes the inventory level for a specified blood type.
 func (h *InventoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 	bloodType := model.BloodType(r.PathValue("bloodType"))
 
@@ -32,7 +36,7 @@ func (h *InventoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updated, err := h.repo.Update(bloodType, body.Level)
+	updated, err := h.repo.Update(r.Context(), bloodType, body.Level)
 	if err != nil {
 		writeRepoError(w, err)
 		return

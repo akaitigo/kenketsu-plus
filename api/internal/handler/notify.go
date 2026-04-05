@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -46,7 +47,9 @@ func (h *NotifyHandler) InventoryAlert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	urgentTypes := h.findUrgentBloodTypes()
+	ctx := r.Context()
+
+	urgentTypes := h.findUrgentBloodTypes(ctx)
 	if len(urgentTypes) == 0 {
 		writeJSON(w, http.StatusOK, NotifyResult{
 			Notified: 0,
@@ -55,7 +58,7 @@ func (h *NotifyHandler) InventoryAlert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subs := h.subRepo.List()
+	subs := h.subRepo.List(ctx)
 	if len(subs) == 0 {
 		writeJSON(w, http.StatusOK, NotifyResult{
 			Notified: 0,
@@ -77,7 +80,7 @@ func (h *NotifyHandler) InventoryAlert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sent, failed := h.dispatchNotifications(subs, payloadJSON, opts)
+	sent, failed := h.dispatchNotifications(ctx, subs, payloadJSON, opts)
 
 	writeJSON(w, http.StatusOK, NotifyResult{
 		Notified: sent,
@@ -87,8 +90,8 @@ func (h *NotifyHandler) InventoryAlert(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *NotifyHandler) findUrgentBloodTypes() []string {
-	inventories := h.inventoryRepo.List()
+func (h *NotifyHandler) findUrgentBloodTypes(ctx context.Context) []string {
+	inventories := h.inventoryRepo.List(ctx)
 	var urgentTypes []string
 	for _, inv := range inventories {
 		if inv.Level == "critical" || inv.Level == "low" {
@@ -125,6 +128,7 @@ func buildAlertPayload(urgentTypes []string) ([]byte, error) {
 }
 
 func (h *NotifyHandler) dispatchNotifications(
+	ctx context.Context,
 	subs []*model.PushSubscription,
 	payloadJSON []byte,
 	opts *webpush.Options,
@@ -155,7 +159,7 @@ func (h *NotifyHandler) dispatchNotifications(
 
 		if h.isExpiredSubscription(resp.StatusCode) {
 			log.Printf("Subscription expired (status %d), removing: %s", resp.StatusCode, sub.Endpoint)
-			if delErr := h.subRepo.DeleteByEndpoint(sub.Endpoint); delErr != nil {
+			if delErr := h.subRepo.DeleteByEndpoint(ctx, sub.Endpoint); delErr != nil {
 				log.Printf("Failed to delete expired subscription: %v", delErr)
 			}
 			failed++

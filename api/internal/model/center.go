@@ -1,15 +1,19 @@
+// Package model defines domain types and validation rules for kenketsu-plus.
 package model
 
 import "time"
 
+// CenterStatus represents the operational status of a donation center.
 type CenterStatus string
 
+// CenterStatus constants define the possible statuses for a donation center.
 const (
 	CenterStatusOpen   CenterStatus = "open"
 	CenterStatusClosed CenterStatus = "closed"
 	CenterStatusFull   CenterStatus = "full"
 )
 
+// DonationCenter represents a blood donation facility with location and availability.
 type DonationCenter struct {
 	CreatedAt      time.Time    `json:"createdAt"`
 	UpdatedAt      time.Time    `json:"updatedAt"`
@@ -23,6 +27,7 @@ type DonationCenter struct {
 	AvailableSlots int          `json:"availableSlots"`
 }
 
+// Validate checks that all required fields are present and within valid ranges.
 func (c *DonationCenter) Validate() error {
 	if c.Name == "" {
 		return ErrFieldRequired("name")

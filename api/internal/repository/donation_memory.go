@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -8,19 +9,22 @@ import (
 	"github.com/akaitigo/kenketsu-plus/api/internal/model"
 )
 
+// DonationRepository is the in-memory implementation of DonationRepo.
 type DonationRepository struct {
 	donations map[string]*model.Donation
 	mu        sync.RWMutex
 	nextID    int
 }
 
+// NewDonationRepository creates a new in-memory donation repository.
 func NewDonationRepository() *DonationRepository {
 	return &DonationRepository{
 		donations: make(map[string]*model.Donation),
 	}
 }
 
-func (r *DonationRepository) List() []*model.Donation {
+// List returns all donation records from memory.
+func (r *DonationRepository) List(_ context.Context) []*model.Donation {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -31,7 +35,8 @@ func (r *DonationRepository) List() []*model.Donation {
 	return result
 }
 
-func (r *DonationRepository) Create(d *model.Donation) (*model.Donation, error) {
+// Create inserts a new donation record into memory.
+func (r *DonationRepository) Create(_ context.Context, d *model.Donation) (*model.Donation, error) {
 	if err := d.Validate(); err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -8,12 +9,14 @@ import (
 	"github.com/akaitigo/kenketsu-plus/api/internal/model"
 )
 
+// InventoryRepository is the in-memory implementation of InventoryRepo.
 type InventoryRepository struct {
 	inventory map[model.BloodType]*model.BloodInventory
 	mu        sync.RWMutex
 	nextID    int
 }
 
+// NewInventoryRepository creates a new in-memory inventory repository with default entries.
 func NewInventoryRepository() *InventoryRepository {
 	repo := &InventoryRepository{
 		inventory: make(map[model.BloodType]*model.BloodInventory),
@@ -30,7 +33,8 @@ func NewInventoryRepository() *InventoryRepository {
 	return repo
 }
 
-func (r *InventoryRepository) List() []*model.BloodInventory {
+// List returns all blood inventory records from memory.
+func (r *InventoryRepository) List(_ context.Context) []*model.BloodInventory {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -41,7 +45,8 @@ func (r *InventoryRepository) List() []*model.BloodInventory {
 	return result
 }
 
-func (r *InventoryRepository) Update(bloodType model.BloodType, level model.InventoryLevel) (*model.BloodInventory, error) {
+// Update changes the inventory level for the specified blood type.
+func (r *InventoryRepository) Update(_ context.Context, bloodType model.BloodType, level model.InventoryLevel) (*model.BloodInventory, error) {
 	if !model.IsValidBloodType(bloodType) {
 		return nil, model.ErrFieldInvalid("bloodType", "invalid blood type: "+string(bloodType))
 	}
@@ -62,7 +67,8 @@ func (r *InventoryRepository) Update(bloodType model.BloodType, level model.Inve
 	return inv, nil
 }
 
-func (r *InventoryRepository) GetByBloodType(bt model.BloodType) (*model.BloodInventory, error) {
+// GetByBloodType returns the inventory record for the specified blood type.
+func (r *InventoryRepository) GetByBloodType(_ context.Context, bt model.BloodType) (*model.BloodInventory, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

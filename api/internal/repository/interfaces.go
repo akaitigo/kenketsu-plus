@@ -1,32 +1,37 @@
+// Package repository defines persistence interfaces and their implementations.
 package repository
 
-import "github.com/akaitigo/kenketsu-plus/api/internal/model"
+import (
+	"context"
+
+	"github.com/akaitigo/kenketsu-plus/api/internal/model"
+)
 
 // CenterRepo defines the interface for donation center persistence.
 type CenterRepo interface {
-	List() []*model.DonationCenter
-	ListByDistance(lat, lng, radiusKm float64) []*model.DonationCenter
-	GetByID(id string) (*model.DonationCenter, error)
-	Create(c *model.DonationCenter) (*model.DonationCenter, error)
+	List(ctx context.Context) []*model.DonationCenter
+	ListByDistance(ctx context.Context, lat, lng, radiusKm float64) []*model.DonationCenter
+	GetByID(ctx context.Context, id string) (*model.DonationCenter, error)
+	Create(ctx context.Context, c *model.DonationCenter) (*model.DonationCenter, error)
 }
 
 // DonationRepo defines the interface for donation record persistence.
 type DonationRepo interface {
-	List() []*model.Donation
-	Create(d *model.Donation) (*model.Donation, error)
+	List(ctx context.Context) []*model.Donation
+	Create(ctx context.Context, d *model.Donation) (*model.Donation, error)
 }
 
 // InventoryRepo defines the interface for blood inventory persistence.
 type InventoryRepo interface {
-	List() []*model.BloodInventory
-	Update(bloodType model.BloodType, level model.InventoryLevel) (*model.BloodInventory, error)
-	GetByBloodType(bt model.BloodType) (*model.BloodInventory, error)
+	List(ctx context.Context) []*model.BloodInventory
+	Update(ctx context.Context, bloodType model.BloodType, level model.InventoryLevel) (*model.BloodInventory, error)
+	GetByBloodType(ctx context.Context, bt model.BloodType) (*model.BloodInventory, error)
 }
 
 // SubscriptionRepo defines the interface for push subscription persistence.
 type SubscriptionRepo interface {
-	List() []*model.PushSubscription
-	Create(s *model.PushSubscription) (*model.PushSubscription, error)
-	Delete(id string) error
-	DeleteByEndpoint(endpoint string) error
+	List(ctx context.Context) []*model.PushSubscription
+	Create(ctx context.Context, s *model.PushSubscription) (*model.PushSubscription, error)
+	Delete(ctx context.Context, id string) error
+	DeleteByEndpoint(ctx context.Context, endpoint string) error
 }

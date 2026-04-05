@@ -18,8 +18,7 @@ func NewPgDonationRepository(db *sql.DB) *PgDonationRepository {
 }
 
 // List returns all donations ordered by donated_at desc.
-func (r *PgDonationRepository) List() []*model.Donation {
-	ctx := context.Background()
+func (r *PgDonationRepository) List(ctx context.Context) []*model.Donation {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, blood_type, donation_type, gender, donated_at, volume_ml, COALESCE(memo, ''), created_at
 		FROM donations
@@ -48,12 +47,11 @@ func (r *PgDonationRepository) List() []*model.Donation {
 }
 
 // Create inserts a new donation record.
-func (r *PgDonationRepository) Create(d *model.Donation) (*model.Donation, error) {
+func (r *PgDonationRepository) Create(ctx context.Context, d *model.Donation) (*model.Donation, error) {
 	if err := d.Validate(); err != nil {
 		return nil, err
 	}
 
-	ctx := context.Background()
 	err := r.db.QueryRowContext(ctx, `
 		INSERT INTO donations (blood_type, donation_type, gender, donated_at, volume_ml, memo)
 		VALUES ($1, $2, $3, $4, $5, $6)

@@ -19,8 +19,7 @@ func NewPgCenterRepository(db *sql.DB) *PgCenterRepository {
 }
 
 // List returns all donation centers.
-func (r *PgCenterRepository) List() []*model.DonationCenter {
-	ctx := context.Background()
+func (r *PgCenterRepository) List(ctx context.Context) []*model.DonationCenter {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, name, address, lat, lng, capacity, available_slots, status, created_at, updated_at
 		FROM donation_centers
@@ -35,8 +34,8 @@ func (r *PgCenterRepository) List() []*model.DonationCenter {
 }
 
 // ListByDistance returns centers within radiusKm of the given coordinates, sorted by distance.
-func (r *PgCenterRepository) ListByDistance(lat, lng, radiusKm float64) []*model.DonationCenter {
-	all := r.List()
+func (r *PgCenterRepository) ListByDistance(ctx context.Context, lat, lng, radiusKm float64) []*model.DonationCenter {
+	all := r.List(ctx)
 
 	type centerDist struct {
 		center *model.DonationCenter
@@ -62,8 +61,7 @@ func (r *PgCenterRepository) ListByDistance(lat, lng, radiusKm float64) []*model
 }
 
 // GetByID returns a donation center by ID.
-func (r *PgCenterRepository) GetByID(id string) (*model.DonationCenter, error) {
-	ctx := context.Background()
+func (r *PgCenterRepository) GetByID(ctx context.Context, id string) (*model.DonationCenter, error) {
 	var c model.DonationCenter
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id, name, address, lat, lng, capacity, available_slots, status, created_at, updated_at
@@ -77,7 +75,7 @@ func (r *PgCenterRepository) GetByID(id string) (*model.DonationCenter, error) {
 }
 
 // Create inserts a new donation center.
-func (r *PgCenterRepository) Create(c *model.DonationCenter) (*model.DonationCenter, error) {
+func (r *PgCenterRepository) Create(ctx context.Context, c *model.DonationCenter) (*model.DonationCenter, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -86,7 +84,6 @@ func (r *PgCenterRepository) Create(c *model.DonationCenter) (*model.DonationCen
 		c.Status = model.CenterStatusOpen
 	}
 
-	ctx := context.Background()
 	err := r.db.QueryRowContext(ctx, `
 		INSERT INTO donation_centers (name, address, lat, lng, capacity, available_slots, status)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)

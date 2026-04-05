@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -8,19 +9,22 @@ import (
 	"github.com/akaitigo/kenketsu-plus/api/internal/model"
 )
 
+// SubscriptionRepository is the in-memory implementation of SubscriptionRepo.
 type SubscriptionRepository struct {
 	subscriptions map[string]*model.PushSubscription
 	mu            sync.RWMutex
 	nextID        int
 }
 
+// NewSubscriptionRepository creates a new in-memory subscription repository.
 func NewSubscriptionRepository() *SubscriptionRepository {
 	return &SubscriptionRepository{
 		subscriptions: make(map[string]*model.PushSubscription),
 	}
 }
 
-func (r *SubscriptionRepository) List() []*model.PushSubscription {
+// List returns all push subscriptions from memory.
+func (r *SubscriptionRepository) List(_ context.Context) []*model.PushSubscription {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -31,7 +35,8 @@ func (r *SubscriptionRepository) List() []*model.PushSubscription {
 	return result
 }
 
-func (r *SubscriptionRepository) Create(s *model.PushSubscription) (*model.PushSubscription, error) {
+// Create inserts a new push subscription into memory.
+func (r *SubscriptionRepository) Create(_ context.Context, s *model.PushSubscription) (*model.PushSubscription, error) {
 	if err := s.Validate(); err != nil {
 		return nil, err
 	}
@@ -47,7 +52,8 @@ func (r *SubscriptionRepository) Create(s *model.PushSubscription) (*model.PushS
 	return s, nil
 }
 
-func (r *SubscriptionRepository) Delete(id string) error {
+// Delete removes a push subscription by its ID.
+func (r *SubscriptionRepository) Delete(_ context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -58,7 +64,8 @@ func (r *SubscriptionRepository) Delete(id string) error {
 	return nil
 }
 
-func (r *SubscriptionRepository) DeleteByEndpoint(endpoint string) error {
+// DeleteByEndpoint removes a push subscription by its endpoint URL.
+func (r *SubscriptionRepository) DeleteByEndpoint(_ context.Context, endpoint string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

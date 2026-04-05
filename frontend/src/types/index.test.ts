@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	isBloodType,
-	isDonationType,
-	isGender,
-	parseBloodType,
-	parseDonationType,
-	parseGender,
-} from "./index";
+import { isBloodType, isDonationType, isGender, parseBloodType, parseDonationType, parseGender } from "./index";
 
 describe("isBloodType", () => {
 	it("returns true for valid blood types", () => {

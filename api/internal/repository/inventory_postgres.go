@@ -19,8 +19,7 @@ func NewPgInventoryRepository(db *sql.DB) *PgInventoryRepository {
 }
 
 // List returns all blood inventory records.
-func (r *PgInventoryRepository) List() []*model.BloodInventory {
-	ctx := context.Background()
+func (r *PgInventoryRepository) List(ctx context.Context) []*model.BloodInventory {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, blood_type, level, updated_at
 		FROM blood_inventory
@@ -49,7 +48,7 @@ func (r *PgInventoryRepository) List() []*model.BloodInventory {
 }
 
 // Update updates the inventory level for the specified blood type.
-func (r *PgInventoryRepository) Update(bloodType model.BloodType, level model.InventoryLevel) (*model.BloodInventory, error) {
+func (r *PgInventoryRepository) Update(ctx context.Context, bloodType model.BloodType, level model.InventoryLevel) (*model.BloodInventory, error) {
 	if !model.IsValidBloodType(bloodType) {
 		return nil, model.ErrFieldInvalid("bloodType", "invalid blood type: "+string(bloodType))
 	}
@@ -57,7 +56,6 @@ func (r *PgInventoryRepository) Update(bloodType model.BloodType, level model.In
 		return nil, model.ErrFieldInvalid("level", "invalid inventory level: "+string(level))
 	}
 
-	ctx := context.Background()
 	var inv model.BloodInventory
 	err := r.db.QueryRowContext(ctx, `
 		UPDATE blood_inventory SET level = $1, updated_at = NOW()
@@ -74,8 +72,7 @@ func (r *PgInventoryRepository) Update(bloodType model.BloodType, level model.In
 }
 
 // GetByBloodType returns the inventory for the specified blood type.
-func (r *PgInventoryRepository) GetByBloodType(bt model.BloodType) (*model.BloodInventory, error) {
-	ctx := context.Background()
+func (r *PgInventoryRepository) GetByBloodType(ctx context.Context, bt model.BloodType) (*model.BloodInventory, error) {
 	var inv model.BloodInventory
 	err := r.db.QueryRowContext(ctx, `
 		SELECT id, blood_type, level, updated_at

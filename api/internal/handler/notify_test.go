@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -11,9 +12,9 @@ import (
 func TestNotifyInventoryAlert_NoSecret(t *testing.T) {
 	router := newTestRouter()
 
-	// NOTIFY_SECRET not set → 503
+	// NOTIFY_SECRET not set -> 503
 	t.Setenv("NOTIFY_SECRET", "")
-	req := httptest.NewRequest(http.MethodPost, "/api/notify/inventory-alert", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/notify/inventory-alert", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -26,7 +27,7 @@ func TestNotifyInventoryAlert_Unauthorized(t *testing.T) {
 	router := newTestRouter()
 
 	t.Setenv("NOTIFY_SECRET", "test-secret")
-	req := httptest.NewRequest(http.MethodPost, "/api/notify/inventory-alert", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/notify/inventory-alert", nil)
 	req.Header.Set("X-Notify-Secret", "wrong-secret")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -40,7 +41,7 @@ func TestNotifyInventoryAlert_NoUrgentTypes(t *testing.T) {
 	router := newTestRouter()
 
 	t.Setenv("NOTIFY_SECRET", "test-secret")
-	req := httptest.NewRequest(http.MethodPost, "/api/notify/inventory-alert", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/notify/inventory-alert", nil)
 	req.Header.Set("X-Notify-Secret", "test-secret")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -68,7 +69,7 @@ func TestNotifyInventoryAlert_NoVAPID(t *testing.T) {
 	t.Setenv("VAPID_PRIVATE_KEY", "")
 	t.Setenv("VAPID_SUBJECT", "")
 
-	req := httptest.NewRequest(http.MethodPost, "/api/notify/inventory-alert", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/notify/inventory-alert", nil)
 	req.Header.Set("X-Notify-Secret", "test-secret")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -86,7 +87,7 @@ func TestNotifyInventoryAlert_NoSubscribers(t *testing.T) {
 	t.Setenv("VAPID_PRIVATE_KEY", "test-key")
 	t.Setenv("VAPID_SUBJECT", "mailto:test@example.com")
 
-	req := httptest.NewRequest(http.MethodPost, "/api/notify/inventory-alert", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/notify/inventory-alert", nil)
 	req.Header.Set("X-Notify-Secret", "test-secret")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -111,14 +112,14 @@ func newTestNotifyRouter(t *testing.T) http.Handler {
 
 	// Update inventory to critical
 	body := `{"level":"critical"}`
-	updateReq := httptest.NewRequest(http.MethodPut, "/api/inventory/A+", bytes.NewBufferString(body))
+	updateReq := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/A+", bytes.NewBufferString(body))
 	updateReq.Header.Set("Content-Type", "application/json")
 	updateRec := httptest.NewRecorder()
 	router.ServeHTTP(updateRec, updateReq)
 
 	// Add subscription
 	subBody := `{"endpoint":"https://push.example.com/test","p256dh":"test-p256dh","auth":"test-auth"}`
-	subReq := httptest.NewRequest(http.MethodPost, "/api/subscriptions", bytes.NewBufferString(subBody))
+	subReq := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/subscriptions", bytes.NewBufferString(subBody))
 	subRec := httptest.NewRecorder()
 	router.ServeHTTP(subRec, subReq)
 
@@ -132,7 +133,7 @@ func newTestNotifyRouterNoSubs(t *testing.T) http.Handler {
 
 	// Update inventory to critical
 	body := `{"level":"critical"}`
-	updateReq := httptest.NewRequest(http.MethodPut, "/api/inventory/A+", bytes.NewBufferString(body))
+	updateReq := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/A+", bytes.NewBufferString(body))
 	updateReq.Header.Set("Content-Type", "application/json")
 	updateRec := httptest.NewRecorder()
 	router.ServeHTTP(updateRec, updateReq)
