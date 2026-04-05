@@ -1,3 +1,4 @@
+// Package handler implements HTTP request handlers for the kenketsu-plus API.
 package handler
 
 import (
@@ -9,20 +10,23 @@ import (
 	"github.com/akaitigo/kenketsu-plus/api/internal/repository"
 )
 
+// CenterHandler handles HTTP requests for donation centers.
 type CenterHandler struct {
-	repo *repository.CenterRepository
+	repo repository.CenterRepo
 }
 
-func NewCenterHandler(repo *repository.CenterRepository) *CenterHandler {
+// NewCenterHandler creates a new handler for donation center endpoints.
+func NewCenterHandler(repo repository.CenterRepo) *CenterHandler {
 	return &CenterHandler{repo: repo}
 }
 
+// List returns all donation centers, optionally filtered by distance.
 func (h *CenterHandler) List(w http.ResponseWriter, r *http.Request) {
 	latStr := r.URL.Query().Get("lat")
 	lngStr := r.URL.Query().Get("lng")
 
 	if latStr == "" || lngStr == "" {
-		centers := h.repo.List()
+		centers := h.repo.List(r.Context())
 		writeJSON(w, http.StatusOK, centers)
 		return
 	}
@@ -57,13 +61,14 @@ func (h *CenterHandler) listByDistance(w http.ResponseWriter, r *http.Request, l
 		return
 	}
 
-	centers := h.repo.ListByDistance(lat, lng, radius)
+	centers := h.repo.ListByDistance(r.Context(), lat, lng, radius)
 	writeJSON(w, http.StatusOK, centers)
 }
 
+// GetByID returns a single donation center by its ID.
 func (h *CenterHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	center, err := h.repo.GetByID(id)
+	center, err := h.repo.GetByID(r.Context(), id)
 	if err != nil {
 		writeError(w, http.StatusNotFound, err.Error())
 		return
@@ -71,6 +76,7 @@ func (h *CenterHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, center)
 }
 
+// Create registers a new donation center.
 func (h *CenterHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var center model.DonationCenter
 	if err := json.NewDecoder(r.Body).Decode(&center); err != nil {
@@ -78,7 +84,7 @@ func (h *CenterHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	created, err := h.repo.Create(&center)
+	created, err := h.repo.Create(r.Context(), &center)
 	if err != nil {
 		writeRepoError(w, err)
 		return

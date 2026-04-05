@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -15,7 +16,7 @@ func TestInventoryList(t *testing.T) {
 
 	router := newTestRouter()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/inventory", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/inventory", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -57,7 +58,7 @@ func TestInventoryUpdate(t *testing.T) {
 		t.Fatalf("failed to marshal body: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodPut, "/api/inventory/A+", bytes.NewReader(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/A+", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -89,7 +90,7 @@ func TestInventoryUpdate_InvalidBloodType(t *testing.T) {
 		t.Fatalf("failed to marshal body: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodPut, "/api/inventory/X+", bytes.NewReader(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/X+", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -109,7 +110,7 @@ func TestInventoryUpdate_InvalidLevel(t *testing.T) {
 		t.Fatalf("failed to marshal body: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodPut, "/api/inventory/A+", bytes.NewReader(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/A+", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)

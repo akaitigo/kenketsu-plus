@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"sort"
@@ -10,19 +11,22 @@ import (
 	"github.com/akaitigo/kenketsu-plus/api/internal/model"
 )
 
+// CenterRepository is the in-memory implementation of CenterRepo.
 type CenterRepository struct {
 	centers map[string]*model.DonationCenter
 	mu      sync.RWMutex
 	nextID  int
 }
 
+// NewCenterRepository creates a new in-memory center repository.
 func NewCenterRepository() *CenterRepository {
 	return &CenterRepository{
 		centers: make(map[string]*model.DonationCenter),
 	}
 }
 
-func (r *CenterRepository) List() []*model.DonationCenter {
+// List returns all donation centers from memory.
+func (r *CenterRepository) List(_ context.Context) []*model.DonationCenter {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -38,8 +42,9 @@ type centerWithDist struct {
 	dist   float64
 }
 
-func (r *CenterRepository) ListByDistance(lat, lng, radiusKm float64) []*model.DonationCenter {
-	all := r.List()
+// ListByDistance returns centers within radiusKm of the given coordinates, sorted by distance.
+func (r *CenterRepository) ListByDistance(ctx context.Context, lat, lng, radiusKm float64) []*model.DonationCenter {
+	all := r.List(ctx)
 
 	// M-3: cache haversine distances to avoid N log N recomputation in sort
 	candidates := make([]centerWithDist, 0, len(all))
@@ -60,7 +65,8 @@ func (r *CenterRepository) ListByDistance(lat, lng, radiusKm float64) []*model.D
 	return result
 }
 
-func (r *CenterRepository) GetByID(id string) (*model.DonationCenter, error) {
+// GetByID returns a donation center by its ID.
+func (r *CenterRepository) GetByID(_ context.Context, id string) (*model.DonationCenter, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -71,7 +77,8 @@ func (r *CenterRepository) GetByID(id string) (*model.DonationCenter, error) {
 	return c, nil
 }
 
-func (r *CenterRepository) Create(c *model.DonationCenter) (*model.DonationCenter, error) {
+// Create inserts a new donation center into memory.
+func (r *CenterRepository) Create(_ context.Context, c *model.DonationCenter) (*model.DonationCenter, error) {
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -107,3 +114,6 @@ func haversineKm(lat1, lng1, lat2, lng2 float64) float64 {
 func degreesToRadians(d float64) float64 {
 	return d * math.Pi / 180
 }
+
+// Compile-time interface check.
+var _ CenterRepo = (*CenterRepository)(nil)

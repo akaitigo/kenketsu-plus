@@ -3,7 +3,7 @@
 import { DonationForm } from "@/components/DonationForm";
 import { NextDonationDate } from "@/components/NextDonationDate";
 import { api } from "@/lib/api";
-import type { Donation, Gender } from "@/types";
+import { type Donation, type Gender, parseGender } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 
 export default function DonationsPage() {
@@ -30,7 +30,7 @@ export default function DonationsPage() {
 			<section>
 				<h2>次回献血可能日</h2>
 				<label htmlFor="gender-select">性別: </label>
-				<select id="gender-select" value={gender} onChange={(e) => setGender(e.target.value as Gender)}>
+				<select id="gender-select" value={gender} onChange={(e) => setGender(parseGender(e.target.value))}>
 					<option value="male">男性</option>
 					<option value="female">女性</option>
 				</select>

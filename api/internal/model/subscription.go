@@ -2,6 +2,7 @@ package model
 
 import "time"
 
+// PushSubscription represents a WebPush subscription for receiving notifications.
 type PushSubscription struct {
 	CreatedAt time.Time `json:"createdAt"`
 	ID        string    `json:"id"`
@@ -10,6 +11,7 @@ type PushSubscription struct {
 	Auth      string    `json:"auth"`
 }
 
+// Validate checks that all required subscription fields are present.
 func (s *PushSubscription) Validate() error {
 	if s.Endpoint == "" {
 		return ErrFieldRequired("endpoint")

@@ -8,11 +8,12 @@ import (
 	"github.com/akaitigo/kenketsu-plus/api/internal/service"
 )
 
+// NewRouter creates the HTTP router with all API routes registered.
 func NewRouter(
-	centerRepo *repository.CenterRepository,
-	donationRepo *repository.DonationRepository,
-	inventoryRepo *repository.InventoryRepository,
-	subRepo *repository.SubscriptionRepository,
+	centerRepo repository.CenterRepo,
+	donationRepo repository.DonationRepo,
+	inventoryRepo repository.InventoryRepo,
+	subRepo repository.SubscriptionRepo,
 	calculator *service.DonationCalculator,
 ) http.Handler {
 	mux := http.NewServeMux()

@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -26,7 +27,7 @@ func TestDonation_ListEmpty(t *testing.T) {
 	t.Parallel()
 	router := newTestDonationRouter()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/donations", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/donations", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -40,7 +41,7 @@ func TestDonation_CreateValid(t *testing.T) {
 	router := newTestDonationRouter()
 
 	body := `{"bloodType":"A+","donationType":"whole_400","gender":"male","donatedAt":"2026-03-01T10:00:00Z","volumeMl":400}`
-	req := httptest.NewRequest(http.MethodPost, "/api/donations", bytes.NewBufferString(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/donations", bytes.NewBufferString(body))
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -62,7 +63,7 @@ func TestDonation_CreateInvalidBloodType(t *testing.T) {
 	router := newTestDonationRouter()
 
 	body := `{"bloodType":"X+","donationType":"whole_400","gender":"male","donatedAt":"2026-03-01T10:00:00Z","volumeMl":400}`
-	req := httptest.NewRequest(http.MethodPost, "/api/donations", bytes.NewBufferString(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/donations", bytes.NewBufferString(body))
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -75,7 +76,7 @@ func TestDonation_NextAvailable_NoGender(t *testing.T) {
 	t.Parallel()
 	router := newTestDonationRouter()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/donations/next-available", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/donations/next-available", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -88,7 +89,7 @@ func TestDonation_NextAvailable_Valid(t *testing.T) {
 	t.Parallel()
 	router := newTestDonationRouter()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/donations/next-available?gender=male", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/api/donations/next-available?gender=male", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 

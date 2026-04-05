@@ -1,3 +1,4 @@
+// Package service implements business logic for kenketsu-plus.
 package service
 
 import (
@@ -7,12 +8,15 @@ import (
 	"github.com/akaitigo/kenketsu-plus/api/internal/model"
 )
 
+// DonationCalculator computes donation interval rules and next-available dates.
 type DonationCalculator struct{}
 
+// NewDonationCalculator creates a new donation calculator instance.
 func NewDonationCalculator() *DonationCalculator {
 	return &DonationCalculator{}
 }
 
+// NextAvailableResult holds the computed next donation date and related information.
 type NextAvailableResult struct {
 	NextDate       time.Time `json:"nextDate"`
 	Reason         string    `json:"reason"`
@@ -43,6 +47,7 @@ func (c *DonationCalculator) annualWholeLimit(gender model.Gender) int {
 	return 2
 }
 
+// NextAvailableDate calculates the earliest date a donor can give blood based on history and gender.
 func (c *DonationCalculator) NextAvailableDate(donations []*model.Donation, gender model.Gender) NextAvailableResult {
 	now := time.Now()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)

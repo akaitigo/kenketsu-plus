@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -27,7 +28,7 @@ func TestSubscription_Create(t *testing.T) {
 	router := newTestSubRouter()
 
 	body := `{"endpoint":"https://push.example.com/sub1","p256dh":"test-key","auth":"test-auth"}`
-	req := httptest.NewRequest(http.MethodPost, "/api/subscriptions", bytes.NewBufferString(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/subscriptions", bytes.NewBufferString(body))
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -49,7 +50,7 @@ func TestSubscription_CreateInvalid(t *testing.T) {
 	router := newTestSubRouter()
 
 	body := `{"endpoint":"","p256dh":"key","auth":"auth"}`
-	req := httptest.NewRequest(http.MethodPost, "/api/subscriptions", bytes.NewBufferString(body))
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/subscriptions", bytes.NewBufferString(body))
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -64,7 +65,7 @@ func TestSubscription_Delete(t *testing.T) {
 
 	// Create first
 	body := `{"endpoint":"https://push.example.com/sub2","p256dh":"key","auth":"auth"}`
-	createReq := httptest.NewRequest(http.MethodPost, "/api/subscriptions", bytes.NewBufferString(body))
+	createReq := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/subscriptions", bytes.NewBufferString(body))
 	createRec := httptest.NewRecorder()
 	router.ServeHTTP(createRec, createReq)
 
@@ -79,7 +80,7 @@ func TestSubscription_Delete(t *testing.T) {
 	}
 
 	// Delete
-	delReq := httptest.NewRequest(http.MethodDelete, "/api/subscriptions/"+id, nil)
+	delReq := httptest.NewRequestWithContext(context.Background(), http.MethodDelete, "/api/subscriptions/"+id, nil)
 	delRec := httptest.NewRecorder()
 	router.ServeHTTP(delRec, delReq)
 
@@ -92,7 +93,7 @@ func TestSubscription_DeleteNotFound(t *testing.T) {
 	t.Parallel()
 	router := newTestSubRouter()
 
-	req := httptest.NewRequest(http.MethodDelete, "/api/subscriptions/nonexistent", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodDelete, "/api/subscriptions/nonexistent", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
