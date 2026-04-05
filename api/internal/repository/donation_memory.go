@@ -46,3 +46,6 @@ func (r *DonationRepository) Create(d *model.Donation) (*model.Donation, error) 
 	r.donations[d.ID] = d
 	return d, nil
 }
+
+// Compile-time interface check.
+var _ DonationRepo = (*DonationRepository)(nil)

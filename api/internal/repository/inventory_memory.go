@@ -72,3 +72,6 @@ func (r *InventoryRepository) GetByBloodType(bt model.BloodType) (*model.BloodIn
 	}
 	return inv, nil
 }
+
+// Compile-time interface check.
+var _ InventoryRepo = (*InventoryRepository)(nil)

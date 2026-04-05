@@ -1,7 +1,15 @@
 "use client";
 
 import { api } from "@/lib/api";
-import type { BloodType, Donation, DonationType, Gender } from "@/types";
+import {
+	type BloodType,
+	type Donation,
+	type DonationType,
+	type Gender,
+	parseBloodType,
+	parseDonationType,
+	parseGender,
+} from "@/types";
 import { type FormEvent, useState } from "react";
 
 interface DonationFormProps {
@@ -60,7 +68,7 @@ export function DonationForm({ onCreated }: DonationFormProps) {
 		<form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 400 }}>
 			<div>
 				<label htmlFor="blood-type">血液型: </label>
-				<select id="blood-type" value={bloodType} onChange={(e) => setBloodType(e.target.value as BloodType)}>
+				<select id="blood-type" value={bloodType} onChange={(e) => setBloodType(parseBloodType(e.target.value))}>
 					{BLOOD_TYPES.map((bt) => (
 						<option key={bt} value={bt}>
 							{bt}
@@ -73,7 +81,7 @@ export function DonationForm({ onCreated }: DonationFormProps) {
 				<select
 					id="donation-type"
 					value={donationType}
-					onChange={(e) => setDonationType(e.target.value as DonationType)}
+					onChange={(e) => setDonationType(parseDonationType(e.target.value))}
 				>
 					{DONATION_TYPES.map((dt) => (
 						<option key={dt.value} value={dt.value}>
@@ -84,7 +92,7 @@ export function DonationForm({ onCreated }: DonationFormProps) {
 			</div>
 			<div>
 				<label htmlFor="gender">性別: </label>
-				<select id="gender" value={gender} onChange={(e) => setGender(e.target.value as Gender)}>
+				<select id="gender" value={gender} onChange={(e) => setGender(parseGender(e.target.value))}>
 					<option value="male">男性</option>
 					<option value="female">女性</option>
 				</select>

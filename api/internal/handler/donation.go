@@ -10,11 +10,11 @@ import (
 )
 
 type DonationHandler struct {
-	repo       *repository.DonationRepository
+	repo       repository.DonationRepo
 	calculator *service.DonationCalculator
 }
 
-func NewDonationHandler(repo *repository.DonationRepository, calculator *service.DonationCalculator) *DonationHandler {
+func NewDonationHandler(repo repository.DonationRepo, calculator *service.DonationCalculator) *DonationHandler {
 	return &DonationHandler{repo: repo, calculator: calculator}
 }
 

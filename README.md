@@ -18,12 +18,42 @@
 # フロントエンド
 cd frontend && npm install && npm run dev
 
-# API
+# API（インメモリモード — デフォルト）
+cd api && go run ./cmd/server
+
+# API（PostgreSQLモード）
+export STORAGE=postgres
+export DATABASE_URL="postgres://user:password@localhost:5432/kenketsu_plus?sslmode=disable"
 cd api && go run ./cmd/server
 
 # 全チェック（lint + test + build）
 make check
 ```
+
+## データベースセットアップ
+
+PostgreSQLモードを使用する場合は、事前にデータベースとテーブルを作成してください。
+
+```bash
+# 1. データベース作成
+createdb kenketsu_plus
+
+# 2. マイグレーション実行
+psql -d kenketsu_plus -f api/migrations/001_init.sql
+```
+
+マイグレーションにより以下のテーブルが作成されます:
+- `donation_centers` — 献血ルーム情報
+- `donations` — 献血記録
+- `blood_inventory` — 血液型別在庫（初期データ8件自動投入）
+- `push_subscriptions` — プッシュ通知購読
+
+### ストレージ切り替え
+
+| 環境変数 | 値 | 説明 |
+|---------|-----|------|
+| `STORAGE` | `memory`（デフォルト） | インメモリ。開発用。再起動でデータ消失 |
+| `STORAGE` | `postgres` | PostgreSQL永続化。`DATABASE_URL` 必須 |
 
 ## 技術スタック
 

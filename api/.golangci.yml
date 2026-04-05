@@ -1,10 +1,17 @@
+version: "2"
+
 run:
   timeout: 5m
 
 output:
   formats:
-    - format: colored-line-number
+    colored-line-number: {}
   sort-results: true
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
 
 linters:
   enable:
@@ -18,19 +25,14 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
-    - typecheck
     - errname
-    - gofumpt
-    - goimports
     - goconst
     - gocritic
-    - gosimple
     - misspell
     - nakedret
     - prealloc
     - predeclared
     - revive
-    - stylecheck
     - unconvert
     - unparam
     - unused
@@ -54,14 +56,16 @@ linters-settings:
   errcheck:
     check-type-assertions: true
     check-blank: true
-  gofumpt:
-    extra-rules: true
   govet:
     enable-all: true
   nakedret:
     max-func-lines: 10
   nestif:
     min-complexity: 5
+
+formatters-settings:
+  gofumpt:
+    extra-rules: true
 
 issues:
   max-issues-per-linter: 50

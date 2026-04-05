@@ -57,3 +57,19 @@ func (r *SubscriptionRepository) Delete(id string) error {
 	delete(r.subscriptions, id)
 	return nil
 }
+
+func (r *SubscriptionRepository) DeleteByEndpoint(endpoint string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for id, s := range r.subscriptions {
+		if s.Endpoint == endpoint {
+			delete(r.subscriptions, id)
+			return nil
+		}
+	}
+	return fmt.Errorf("subscription not found for endpoint")
+}
+
+// Compile-time interface check.
+var _ SubscriptionRepo = (*SubscriptionRepository)(nil)

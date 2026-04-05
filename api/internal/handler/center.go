@@ -10,10 +10,10 @@ import (
 )
 
 type CenterHandler struct {
-	repo *repository.CenterRepository
+	repo repository.CenterRepo
 }
 
-func NewCenterHandler(repo *repository.CenterRepository) *CenterHandler {
+func NewCenterHandler(repo repository.CenterRepo) *CenterHandler {
 	return &CenterHandler{repo: repo}
 }
 

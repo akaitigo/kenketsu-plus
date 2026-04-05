@@ -9,10 +9,10 @@ import (
 )
 
 type InventoryHandler struct {
-	repo *repository.InventoryRepository
+	repo repository.InventoryRepo
 }
 
-func NewInventoryHandler(repo *repository.InventoryRepository) *InventoryHandler {
+func NewInventoryHandler(repo repository.InventoryRepo) *InventoryHandler {
 	return &InventoryHandler{repo: repo}
 }
 

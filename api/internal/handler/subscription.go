@@ -9,10 +9,10 @@ import (
 )
 
 type SubscriptionHandler struct {
-	repo *repository.SubscriptionRepository
+	repo repository.SubscriptionRepo
 }
 
-func NewSubscriptionHandler(repo *repository.SubscriptionRepository) *SubscriptionHandler {
+func NewSubscriptionHandler(repo repository.SubscriptionRepo) *SubscriptionHandler {
 	return &SubscriptionHandler{repo: repo}
 }
 

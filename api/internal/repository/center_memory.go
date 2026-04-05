@@ -107,3 +107,6 @@ func haversineKm(lat1, lng1, lat2, lng2 float64) float64 {
 func degreesToRadians(d float64) float64 {
 	return d * math.Pi / 180
 }
+
+// Compile-time interface check.
+var _ CenterRepo = (*CenterRepository)(nil)
