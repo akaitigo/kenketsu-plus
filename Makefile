@@ -1,4 +1,4 @@
-.PHONY: build test lint format check clean
+.PHONY: build test lint format check clean generate-vapid
 
 build:
 	cd frontend && npm run build
@@ -22,3 +22,6 @@ check: format lint test build
 clean:
 	cd frontend && rm -rf dist/ .next/ coverage/ node_modules/.cache/
 	cd api && go clean -cache -testcache && rm -f coverage.out
+
+generate-vapid:
+	cd api && go run ./cmd/genvapid

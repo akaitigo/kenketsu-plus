@@ -100,8 +100,11 @@ func (r *CenterRepository) Create(_ context.Context, c *model.DonationCenter) (*
 	return c, nil
 }
 
+// earthRadiusKm is the mean radius of the Earth in kilometers, used by the
+// haversine great-circle distance calculation.
+const earthRadiusKm = 6371.0
+
 func haversineKm(lat1, lng1, lat2, lng2 float64) float64 {
-	const earthRadiusKm = 6371.0
 	dLat := degreesToRadians(lat2 - lat1)
 	dLng := degreesToRadians(lng2 - lng1)
 	a := math.Sin(dLat/2)*math.Sin(dLat/2) +
