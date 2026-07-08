@@ -49,22 +49,28 @@ export function NotificationToggle({ vapidPublicKey }: NotificationToggleProps) 
 		return <p data-testid="notification-denied">通知がブロックされています。ブラウザの設定から許可してください。</p>;
 	}
 
+	const isSubscribed = subscriptionId !== null;
+	const ariaLabel = isSubscribed ? "在庫逼迫通知をオフにする" : "在庫逼迫通知をオンにする";
+
 	return (
 		<button
 			type="button"
 			onClick={handleToggle}
 			disabled={loading}
 			data-testid="notification-toggle"
+			aria-label={ariaLabel}
+			aria-pressed={isSubscribed}
+			aria-busy={loading}
 			style={{
 				padding: "8px 16px",
 				borderRadius: 6,
 				border: "none",
-				backgroundColor: subscriptionId ? "#ef4444" : "#3b82f6",
+				backgroundColor: isSubscribed ? "#ef4444" : "#3b82f6",
 				color: "white",
 				cursor: loading ? "wait" : "pointer",
 			}}
 		>
-			{loading ? "処理中..." : subscriptionId ? "通知をOFF" : "通知をON"}
+			{loading ? "処理中..." : isSubscribed ? "通知をOFF" : "通知をON"}
 		</button>
 	);
 }
