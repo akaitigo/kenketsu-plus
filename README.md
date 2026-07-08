@@ -67,6 +67,22 @@ psql -d kenketsu_plus -f api/migrations/002_push_subscriptions_unique_endpoint.u
 | Test | vitest (TS) / go test (Go) |
 | CI | GitHub Actions |
 
+## Lint (golangci-lint v2)
+
+Go の lint 設定 `api/.golangci.yml` は **golangci-lint v2 スキーマ**（先頭行の `version: "2"`）で記述されています。v1 系はこのスキーマを解釈できないため、ローカルでは golangci-lint v2.x 以降が必要です。
+
+```bash
+# インストール例（v2 系）
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.4
+
+# 実行
+cd api && golangci-lint run ./...
+```
+
+- v2 ではフォーマッタ（gofumpt / goimports）が `formatters` に、その他の linter 設定が `linters` / `linters.settings` に分離されています。
+- CI は `golangci/golangci-lint-action@v9` で `version: v2.11.4` を固定しています（`.github/workflows/ci.yml`）。
+- lint 設定の無効化・変更は ADR を伴わない限り禁止です（`CLAUDE.md` 参照）。
+
 ## アーキテクチャ
 
 ```
