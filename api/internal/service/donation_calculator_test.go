@@ -135,6 +135,183 @@ func TestNextAvailableDate_AnnualLimit_Female(t *testing.T) {
 	}
 }
 
+// TestNextAvailableDate_EdgeCases exercises mixed donation-type sequences,
+// annual-limit interactions, boundary values, unsorted input, and unknown types
+// via a table (#23). Day windows are inclusive and allow ±2 slack to absorb
+// time-of-day and timezone effects on the day-count arithmetic.
+func TestNextAvailableDate_EdgeCases(t *testing.T) {
+	t.Parallel()
+
+	calc := service.NewDonationCalculator()
+
+	d := func(dt model.DonationType, g model.Gender, daysAgo int) *model.Donation {
+		return makeDonation(dt, g, time.Now().AddDate(0, 0, -daysAgo))
+	}
+
+	tests := []struct {
+		name          string
+		gender        model.Gender
+		donations     []*model.Donation
+		wantDaysLo    int // asserted only when wantCanDonate is false
+		wantDaysHi    int
+		wantCanDonate bool
+	}{
+		{
+			name: "component after whole400 uses 2-week interval (component is last)",
+			donations: []*model.Donation{
+				d(model.DonationTypeWhole400, model.GenderMale, 20),
+				d(model.DonationTypeComponent, model.GenderMale, 5),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: false,
+			wantDaysLo:    7,
+			wantDaysHi:    11,
+		},
+		{
+			name: "component to whole400 to component, last component interval expired",
+			donations: []*model.Donation{
+				d(model.DonationTypeComponent, model.GenderMale, 60),
+				d(model.DonationTypeWhole400, model.GenderMale, 40),
+				d(model.DonationTypeComponent, model.GenderMale, 20),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: true,
+		},
+		{
+			name: "whole400 then component, component still in interval",
+			donations: []*model.Donation{
+				d(model.DonationTypeWhole400, model.GenderMale, 30),
+				d(model.DonationTypeComponent, model.GenderMale, 3),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: false,
+			wantDaysLo:    9,
+			wantDaysHi:    13,
+		},
+		{
+			name: "male annual whole limit dominates over interval",
+			donations: []*model.Donation{
+				d(model.DonationTypeWhole400, model.GenderMale, 300),
+				d(model.DonationTypeWhole400, model.GenderMale, 200),
+				d(model.DonationTypeWhole400, model.GenderMale, 100),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: false,
+			wantDaysLo:    62,
+			wantDaysHi:    68,
+		},
+		{
+			name: "whole200 counts toward annual whole limit",
+			donations: []*model.Donation{
+				d(model.DonationTypeWhole200, model.GenderMale, 300),
+				d(model.DonationTypeWhole400, model.GenderMale, 200),
+				d(model.DonationTypeWhole400, model.GenderMale, 100),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: false,
+			wantDaysLo:    62,
+			wantDaysHi:    68,
+		},
+		{
+			name: "component donations never hit annual limit",
+			donations: []*model.Donation{
+				d(model.DonationTypeComponent, model.GenderMale, 100),
+				d(model.DonationTypeComponent, model.GenderMale, 80),
+				d(model.DonationTypeComponent, model.GenderMale, 60),
+				d(model.DonationTypeComponent, model.GenderMale, 40),
+				d(model.DonationTypeComponent, model.GenderMale, 20),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: true,
+		},
+		{
+			name: "female annual whole limit is two",
+			donations: []*model.Donation{
+				d(model.DonationTypeWhole400, model.GenderFemale, 200),
+				d(model.DonationTypeWhole400, model.GenderFemale, 100),
+			},
+			gender:        model.GenderFemale,
+			wantCanDonate: false,
+			wantDaysLo:    160,
+			wantDaysHi:    170,
+		},
+		{
+			name: "female single whole400 uses 16-week interval",
+			donations: []*model.Donation{
+				d(model.DonationTypeWhole400, model.GenderFemale, 50),
+			},
+			gender:        model.GenderFemale,
+			wantCanDonate: false,
+			wantDaysLo:    59,
+			wantDaysHi:    65,
+		},
+		{
+			name: "unsorted input still uses the most recent donation",
+			donations: []*model.Donation{
+				d(model.DonationTypeComponent, model.GenderMale, 3),
+				d(model.DonationTypeWhole400, model.GenderMale, 50),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: false,
+			wantDaysLo:    9,
+			wantDaysHi:    13,
+		},
+		{
+			name: "unknown donation type defaults to 12-week interval",
+			donations: []*model.Donation{
+				d(model.DonationType("unknown"), model.GenderMale, 10),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: false,
+			wantDaysLo:    71,
+			wantDaysHi:    77,
+		},
+		{
+			name: "boundary just past interval can donate",
+			donations: []*model.Donation{
+				d(model.DonationTypeWhole400, model.GenderMale, 88),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: true,
+		},
+		{
+			name: "boundary just before interval cannot donate",
+			donations: []*model.Donation{
+				d(model.DonationTypeWhole400, model.GenderMale, 80),
+			},
+			gender:        model.GenderMale,
+			wantCanDonate: false,
+			wantDaysLo:    2,
+			wantDaysHi:    6,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			result := calc.NextAvailableDate(tt.donations, tt.gender)
+
+			if result.CanDonateToday != tt.wantCanDonate {
+				t.Fatalf("CanDonateToday = %v, want %v (reason: %q, daysRemaining: %d)",
+					result.CanDonateToday, tt.wantCanDonate, result.Reason, result.DaysRemaining)
+			}
+
+			if tt.wantCanDonate {
+				if result.DaysRemaining != 0 {
+					t.Errorf("DaysRemaining = %d, want 0 when donation is possible", result.DaysRemaining)
+				}
+				return
+			}
+
+			if result.DaysRemaining < tt.wantDaysLo || result.DaysRemaining > tt.wantDaysHi {
+				t.Errorf("DaysRemaining = %d, want within [%d, %d]",
+					result.DaysRemaining, tt.wantDaysLo, tt.wantDaysHi)
+			}
+		})
+	}
+}
+
 func TestNextAvailableDate_YearBoundary(t *testing.T) {
 	t.Parallel()
 	calc := service.NewDonationCalculator()
