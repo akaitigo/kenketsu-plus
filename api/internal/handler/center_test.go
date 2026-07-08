@@ -34,6 +34,7 @@ func createCenter(t *testing.T, router http.Handler, center model.DonationCenter
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/centers", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	setAdminKey(req)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -166,6 +167,7 @@ func TestCreateCenter_ValidationError_MissingName(t *testing.T) {
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/centers", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	setAdminKey(req)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -195,6 +197,7 @@ func TestCreateCenter_ValidationError_InvalidLat(t *testing.T) {
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/centers", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	setAdminKey(req)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -210,6 +213,7 @@ func TestCreateCenter_InvalidJSON(t *testing.T) {
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/api/centers", bytes.NewReader([]byte("not json")))
 	req.Header.Set("Content-Type", "application/json")
+	setAdminKey(req)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 

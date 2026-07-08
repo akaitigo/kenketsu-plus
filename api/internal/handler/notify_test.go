@@ -114,6 +114,7 @@ func newTestNotifyRouter(t *testing.T) http.Handler {
 	body := `{"level":"critical"}`
 	updateReq := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/A+", bytes.NewBufferString(body))
 	updateReq.Header.Set("Content-Type", "application/json")
+	setAdminKey(updateReq)
 	updateRec := httptest.NewRecorder()
 	router.ServeHTTP(updateRec, updateReq)
 
@@ -135,6 +136,7 @@ func newTestNotifyRouterNoSubs(t *testing.T) http.Handler {
 	body := `{"level":"critical"}`
 	updateReq := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/A+", bytes.NewBufferString(body))
 	updateReq.Header.Set("Content-Type", "application/json")
+	setAdminKey(updateReq)
 	updateRec := httptest.NewRecorder()
 	router.ServeHTTP(updateRec, updateReq)
 

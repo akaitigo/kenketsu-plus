@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -144,7 +145,7 @@ func (h *NotifyHandler) dispatchNotifications(
 
 		resp, sendErr := webpush.SendNotification(payloadJSON, subscription, opts)
 		if sendErr != nil {
-			log.Printf("WebPush send error for %s: %v", sub.Endpoint, sendErr)
+			log.Printf("WebPush send error for %s: %v", maskEndpoint(sub.Endpoint), sendErr)
 			failed++
 			continue
 		}
@@ -158,7 +159,7 @@ func (h *NotifyHandler) dispatchNotifications(
 		}
 
 		if h.isExpiredSubscription(resp.StatusCode) {
-			log.Printf("Subscription expired (status %d), removing: %s", resp.StatusCode, sub.Endpoint)
+			log.Printf("Subscription expired (status %d), removing: %s", resp.StatusCode, maskEndpoint(sub.Endpoint))
 			if delErr := h.subRepo.DeleteByEndpoint(ctx, sub.Endpoint); delErr != nil {
 				log.Printf("Failed to delete expired subscription: %v", delErr)
 			}
@@ -167,7 +168,7 @@ func (h *NotifyHandler) dispatchNotifications(
 		}
 
 		if resp.StatusCode >= http.StatusBadRequest {
-			log.Printf("WebPush server returned status %d for %s", resp.StatusCode, sub.Endpoint)
+			log.Printf("WebPush server returned status %d for %s", resp.StatusCode, maskEndpoint(sub.Endpoint))
 			failed++
 			continue
 		}
@@ -179,4 +180,20 @@ func (h *NotifyHandler) dispatchNotifications(
 
 func (h *NotifyHandler) isExpiredSubscription(statusCode int) bool {
 	return statusCode == http.StatusGone || statusCode == http.StatusNotFound
+}
+
+// redactedPlaceholder replaces the sensitive path/query segment of a WebPush
+// endpoint URL in log output.
+const redactedPlaceholder = "[redacted]"
+
+// maskEndpoint redacts the path and query of a WebPush endpoint URL before it is
+// logged. The path/query segment contains the per-device subscription token,
+// which is PII; only the scheme and host (the push service) are retained for
+// debugging (#21).
+func maskEndpoint(endpoint string) string {
+	u, err := url.Parse(endpoint)
+	if err != nil || u.Host == "" {
+		return redactedPlaceholder
+	}
+	return u.Scheme + "://" + u.Host + "/" + redactedPlaceholder
 }

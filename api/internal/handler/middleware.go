@@ -45,12 +45,13 @@ func LimitBody(next http.HandlerFunc) http.HandlerFunc {
 }
 
 // RequireAdminKey enforces admin API key authentication for write endpoints (C-3).
+// It is fail-closed: when ADMIN_API_KEY is unset the endpoint is rejected with
+// 503 rather than silently bypassing authentication (#20).
 func RequireAdminKey(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		adminKey := os.Getenv("ADMIN_API_KEY")
 		if adminKey == "" {
-			// Development mode: no key required
-			next(w, r)
+			writeError(w, http.StatusServiceUnavailable, "admin API not configured")
 			return
 		}
 		if r.Header.Get("X-Admin-Key") != adminKey {

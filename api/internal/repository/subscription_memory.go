@@ -35,7 +35,10 @@ func (r *SubscriptionRepository) List(_ context.Context) []*model.PushSubscripti
 	return result
 }
 
-// Create inserts a new push subscription into memory.
+// Create inserts a new push subscription into memory, or updates the keys of an
+// existing one when the endpoint is already registered (UPSERT). This mirrors
+// the PostgreSQL UNIQUE(endpoint) behavior so that re-subscribing does not create
+// duplicate records that would cause duplicate notifications (#18).
 func (r *SubscriptionRepository) Create(_ context.Context, s *model.PushSubscription) (*model.PushSubscription, error) {
 	if err := s.Validate(); err != nil {
 		return nil, err
@@ -43,6 +46,16 @@ func (r *SubscriptionRepository) Create(_ context.Context, s *model.PushSubscrip
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
+	for _, existing := range r.subscriptions {
+		if existing.Endpoint == s.Endpoint {
+			existing.P256dh = s.P256dh
+			existing.Auth = s.Auth
+			s.ID = existing.ID
+			s.CreatedAt = existing.CreatedAt
+			return existing, nil
+		}
+	}
 
 	r.nextID++
 	s.ID = fmt.Sprintf("sub-%d", r.nextID)
