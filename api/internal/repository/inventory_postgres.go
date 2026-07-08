@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/akaitigo/kenketsu-plus/api/internal/model"
@@ -63,7 +64,7 @@ func (r *PgInventoryRepository) Update(ctx context.Context, bloodType model.Bloo
 		RETURNING id, blood_type, level, updated_at
 	`, level, bloodType).Scan(&inv.ID, &inv.BloodType, &inv.Level, &inv.UpdatedAt)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("inventory not found for blood type: %s", bloodType)
 		}
 		return nil, err

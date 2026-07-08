@@ -60,6 +60,7 @@ func TestInventoryUpdate(t *testing.T) {
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/A+", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	setAdminKey(req)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -92,6 +93,7 @@ func TestInventoryUpdate_InvalidBloodType(t *testing.T) {
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/X+", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	setAdminKey(req)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -112,6 +114,7 @@ func TestInventoryUpdate_InvalidLevel(t *testing.T) {
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodPut, "/api/inventory/A+", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	setAdminKey(req)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 

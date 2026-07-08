@@ -47,7 +47,10 @@ func (r *PgSubscriptionRepository) List(ctx context.Context) []*model.PushSubscr
 	return subs
 }
 
-// Create inserts a new push subscription.
+// Create inserts a new push subscription, or updates the keys of an existing
+// one when the endpoint is already registered (UPSERT). This relies on the
+// UNIQUE(endpoint) constraint (migration 002) to prevent duplicate rows that
+// would otherwise cause duplicate notifications (#18).
 func (r *PgSubscriptionRepository) Create(ctx context.Context, s *model.PushSubscription) (*model.PushSubscription, error) {
 	if err := s.Validate(); err != nil {
 		return nil, err
@@ -56,6 +59,8 @@ func (r *PgSubscriptionRepository) Create(ctx context.Context, s *model.PushSubs
 	err := r.db.QueryRowContext(ctx, `
 		INSERT INTO push_subscriptions (endpoint, p256dh, auth)
 		VALUES ($1, $2, $3)
+		ON CONFLICT (endpoint) DO UPDATE
+			SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth
 		RETURNING id, created_at
 	`, s.Endpoint, s.P256dh, s.Auth).Scan(&s.ID, &s.CreatedAt)
 	if err != nil {
