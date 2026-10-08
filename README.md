@@ -3,14 +3,16 @@
 [![CI](https://github.com/akaitigo/kenketsu-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/akaitigo/kenketsu-plus/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-献血ルーム空き状況リアルタイム表示・献血記録管理・血液型別在庫逼迫通知アプリ
+献血ルームの登録情報表示・献血記録管理・血液型別在庫逼迫通知アプリ
 
 ## 特徴
 
-- **献血ルームマップ** — Leaflet.jsで献血ルーム・献血バスの位置と空き状況をリアルタイム表示
+- **献血ルームマップ** — Leaflet.jsで登録済みの施設と空き枠情報を地図に表示
 - **献血記録管理** — 献血履歴の記録、次回献血可能日の自動計算（全血/成分、性別別間隔制限対応）
 - **在庫ダッシュボード** — 血液型別（A+/A-/B+/B-/O+/O-/AB+/AB-）の在庫逼迫度を色分け表示
-- **プッシュ通知** — 在庫逼迫時にPWAプッシュ通知でアラート
+- **プッシュ通知** — 管理用の通知APIを呼び出したとき、登録された在庫レベルが低い血液型について購読者へ通知
+
+施設・空き枠・血液型別在庫はアプリに登録された値です。公式データとの自動同期はなく、マップは表示時に一度取得した情報を示します。在庫通知も登録値に基づき、在庫値の更新だけでは送信されません。実際の受付状況と在庫は各機関の案内で確認してください。
 
 ## クイックスタート
 
@@ -60,7 +62,7 @@ psql -d kenketsu_plus -f api/migrations/002_push_subscriptions_unique_endpoint.u
 
 | レイヤー | 技術 |
 |---------|------|
-| Frontend | Next.js 15 / TypeScript / Leaflet.js / PWA |
+| Frontend | Next.js 16 / TypeScript / Leaflet.js / PWA |
 | Backend | Go 1.23 (net/http, 標準ライブラリ) |
 | Database | PostgreSQL |
 | Lint | biome + oxlint (TS) / golangci-lint (Go) |
